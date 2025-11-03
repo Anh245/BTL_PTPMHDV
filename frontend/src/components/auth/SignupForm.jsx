@@ -100,7 +100,7 @@ export function SignupForm( props ) {
             <FieldGroup>
               <Field>
                 <Button type="submit"
-                  disabled={isSubmitting} className="w-full mt-4"                  
+                  disabled={isSubmitting} className="w-full mt-4 !bg-black hover:!bg-white hover:!text-black !text-white"                  
                 >Create Account</Button>
       
                 <FieldDescription className="px-6 text-center">

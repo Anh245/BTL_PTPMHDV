@@ -6,6 +6,7 @@ import React from 'react'
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+
 const signInSchema = yup.object({
  
   userName: yup.string().min(3,  "Tên bắt buộc 3 ki tu" ),
@@ -62,7 +63,7 @@ export function SigninForm ( props ) {
             </div>
 
           </div>
-           <Button type="submit" className="w-full mb-4" disabled={isSubmitting}>
+           <Button type="submit" className="w-full mb-4 !bg-black !text-white" disabled={isSubmitting}>
               Login
             </Button>
         </form>

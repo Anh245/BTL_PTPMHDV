@@ -1,3 +1,4 @@
+import Layout from '@/common/Layout.jsx';
 import { 
   MapPin, 
   Train, 
@@ -110,10 +111,11 @@ const Dashboard = () => {
   ];
 
   return (
-    // ## Layout chính với nền và padding
-    <main className="bg-slate-100 dark:bg-slate-900 min-h-screen p-4 sm:p-6 lg:p-8 w-full">
-      <Sidebar/>
-      <div className="max-w-full w-full space-y-8">
+     <>
+    
+    <div className="bg-slate-100 dark:bg-slate-900 min-h-screen p-4 sm:p-6 lg:p-8 relative flex flex-row ">
+      <Layout/>
+      <div className=" space-y-8">
 
         {/* Header */}
         <div>
@@ -206,7 +208,8 @@ const Dashboard = () => {
         </div>
         
       </div>
-    </main>
+    </div>
+  </>
   )
 }
 
