@@ -1,8 +1,9 @@
-import { useAuth } from '../hooks/useAuth.jsx'
+
+import { useAuthStore } from '@/stores/useAuthStore.js'
 import { LogOut, Bell, Settings } from 'lucide-react'
 
 const Header = () => {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuthStore()
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -31,7 +32,7 @@ const Header = () => {
                 {user?.username}
               </p>
               <p className="text-xs text-gray-500 capitalize">
-                {user?.role}
+                Them role cho doi tuong 
               </p>
             </div>
             

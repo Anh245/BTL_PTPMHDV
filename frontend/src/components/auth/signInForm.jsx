@@ -6,7 +6,8 @@ import React from 'react'
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import { useAuthStore } from '@/stores/useAuthStore.js'
+import { useNavigate } from 'react-router'
 const signInSchema = yup.object({
  
   userName: yup.string().min(3,  "Tên bắt buộc 3 ki tu" ),
@@ -17,9 +18,17 @@ export function SigninForm ( props ) {
    const {register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
       resolver: yupResolver(signInSchema)
     });
+    const{signIn} = useAuthStore();
+    const navigate = useNavigate();
   
     const onSubmit =  async (data) => {
+      const {username , password} = data;
+      
+
+      await signIn(username, password);
+      navigate("/");
       console.log(data);
+
     }
   return (
     
