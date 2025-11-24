@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { LogOut, Bell, Settings, Moon, Sun } from 'lucide-react';
@@ -33,6 +34,14 @@ const Header = () => {
     logout();
     navigate('/signin');
   };
+=======
+
+import { useAuthStore } from '@/stores/useAuthStore.js'
+import { LogOut, Bell, Settings } from 'lucide-react'
+
+const Header = () => {
+  const { user, logout } = useAuthStore()
+>>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
 
   return (
     <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
@@ -70,6 +79,7 @@ const Header = () => {
             <Settings className="h-5 w-5" />
           </Button>
           
+<<<<<<< HEAD
           {user && (
             <div className="hidden sm:flex items-center gap-3 ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">
               <div className="text-right">
@@ -86,6 +96,17 @@ const Header = () => {
                   {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
+=======
+          {/* User menu */}
+          <div className="flex items-center space-x-3">
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-900">
+                {user?.username}
+              </p>
+              <p className="text-xs text-gray-500 capitalize">
+                Them role cho doi tuong 
+              </p>
+>>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
             </div>
           )}
           

@@ -23,7 +23,26 @@ export const authAPI = {
   getUsers: async () => {
     const res = await api.get("/auth/users");
     return res.data;
+
+  },
+  signIn : async (username, password) =>{
+    const res = await api.post("/auth/signin", {username , password}, {withCredentials: true} );
+      return res.data; 
+    },
+    signOut: async ()=>{
+    const res = await api.post("/auth/signout",{},{withCredentials:true});
+    return res.data;
+  
+  },
+  fetchMe: async () => {
+    const res = await api.get("/users/me", { withCredentials: true });
+    return res.data.user;
+  },
+  refresh : async () => {
+    const res = await api.get("/auth/refresh", { withCredentials: true });
+    return res.data.accessToken;
   }
+<<<<<<< HEAD
 };
 
 export const stationAPI = {
@@ -62,3 +81,7 @@ export const scheduleAPI = {
 };
 
 export default api;
+=======
+  }
+  
+>>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d

@@ -5,12 +5,17 @@ import { Label } from '@/components/ui/label';
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+<<<<<<< HEAD
 import { useAuth } from '@/hooks/useAuth.jsx';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useState } from 'react';
 import vi from '@/lib/translations';
 
+=======
+import { useAuthStore } from '@/stores/useAuthStore.js'
+import { useNavigate } from 'react-router'
+>>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
 const signInSchema = yup.object({
   userName: yup.string().min(3, vi.auth.signIn.validation.usernameMin),
   password: yup.string().min(8, vi.auth.signIn.validation.passwordMin),
@@ -30,9 +35,24 @@ export function SigninForm(props) {
       username: data.userName,
       password: data.password
     });
+<<<<<<< HEAD
     navigate('/dashboard');
   };
 
+=======
+    const{signIn} = useAuthStore();
+    const navigate = useNavigate();
+  
+    const onSubmit =  async (data) => {
+      const {username , password} = data;
+      
+
+      await signIn(username, password);
+      navigate("/");
+      console.log(data);
+
+    }
+>>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
   return (
     <Card {...props} className="animate-scale-in shadow-custom-lg">
       <CardHeader className="text-center">
