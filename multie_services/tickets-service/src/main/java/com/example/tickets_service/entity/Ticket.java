@@ -24,14 +24,28 @@ public class Ticket {
     private Long scheduleRefId;
 
     // Snapshot data từ Schedule
-    @Column(name = "train_number_snapshot", length = 20, nullable = false)
+    // Note: nullable = true for backward compatibility with existing tickets
+    @Column(name = "train_number_snapshot", length = 20)
     private String trainNumberSnapshot;
 
-    @Column(name = "route_snapshot", length = 200, nullable = false)
+    @Column(name = "route_snapshot", length = 200)
     private String routeSnapshot; // "Hà Nội → Sài Gòn"
 
-    @Column(name = "departure_time_snapshot", nullable = false)
+    @Column(name = "departure_time_snapshot")
     private LocalDateTime departureTimeSnapshot;
+
+    @Column(name = "departure_date")
+    private LocalDate departureDate;
+
+    // Legacy fields - kept for backward compatibility with existing database
+    @Column(name = "from_station", length = 100)
+    private String fromStation;
+
+    @Column(name = "to_station", length = 100)
+    private String toStation;
+
+    @Column(name = "train_number", length = 20)
+    private String trainNumber;
 
     @Column(name = "price", precision = 12, scale = 2, nullable = false)
     private BigDecimal price;

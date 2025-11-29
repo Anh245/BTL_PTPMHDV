@@ -20,5 +20,7 @@ public class ScheduleRequest {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 
+    private BigDecimal basePrice;
+
     private Schedule.Status status;
 }

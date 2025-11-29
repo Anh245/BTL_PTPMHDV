@@ -31,6 +31,12 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.getAll());
     }
 
+    // 2.1. GET BY ID - Allow for inter-service communication
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(scheduleService.getById(id));
+    }
+
     // 3. UPDATE - ADMIN ONLY (Dùng PUT cho update)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

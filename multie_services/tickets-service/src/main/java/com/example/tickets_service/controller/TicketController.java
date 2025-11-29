@@ -3,6 +3,7 @@ package com.example.tickets_service.controller;
 import com.example.tickets_service.dto.TicketRequest;
 import com.example.tickets_service.dto.TicketResponse;
 import com.example.tickets_service.service.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,7 @@ public class TicketController {
     // 1. Create - Chỉ ADMIN
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TicketResponse> create(@RequestBody TicketRequest request) {
+    public ResponseEntity<TicketResponse> create(@Valid @RequestBody TicketRequest request) {
         return ResponseEntity.ok(ticketService.create(request));
     }
 
@@ -41,7 +42,7 @@ public class TicketController {
     // 4. Update (Patch/Put) - Chỉ ADMIN
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TicketResponse> update(@PathVariable Long id, @RequestBody TicketRequest request) {
+    public ResponseEntity<TicketResponse> update(@PathVariable Long id, @Valid @RequestBody TicketRequest request) {
         return ResponseEntity.ok(ticketService.update(id, request));
     }
 

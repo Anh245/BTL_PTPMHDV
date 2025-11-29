@@ -88,6 +88,31 @@ export const useScheduleStore = create((set, get) => ({
     }
   },
 
+  // Get active schedules (status "scheduled")
+  getActiveSchedules: async () => {
+    try {
+      set({ loading: true, error: null });
+      const response = await scheduleAPI.getSchedules();
+      const allSchedules = response.data.schedules || response.data;
+      
+      // Filter out cancelled, departed, or delayed schedules
+      // Only include schedules with status "scheduled"
+      const activeSchedules = allSchedules.filter(
+        schedule => schedule.status === 'scheduled'
+      );
+      
+      set({ 
+        schedules: activeSchedules,
+        loading: false 
+      });
+      return activeSchedules;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      console.error('Error fetching active schedules:', error);
+      throw error;
+    }
+  },
+
   // Create schedule
   createSchedule: async (data) => {
     try {

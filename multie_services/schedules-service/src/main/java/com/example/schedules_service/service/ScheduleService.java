@@ -8,6 +8,7 @@ import java.util.List;
 public interface ScheduleService {
     ScheduleResponse create(ScheduleRequest request);
     List<ScheduleResponse> getAll();
+    ScheduleResponse getById(Long id);
     ScheduleResponse update(Long id, ScheduleRequest request);
     void delete(Long id);
 }

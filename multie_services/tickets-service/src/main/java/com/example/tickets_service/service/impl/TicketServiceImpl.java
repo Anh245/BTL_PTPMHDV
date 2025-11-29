@@ -1,14 +1,17 @@
 package com.example.tickets_service.service.impl;
 
+import com.example.tickets_service.client.ScheduleClient;
+import com.example.tickets_service.dto.ScheduleResponse;
 import com.example.tickets_service.dto.TicketRequest;
 import com.example.tickets_service.dto.TicketResponse;
 import com.example.tickets_service.entity.Ticket;
+import com.example.tickets_service.exception.BadRequestException;
 import com.example.tickets_service.exception.NotFoundException;
 import com.example.tickets_service.repository.TicketRepository;
 import com.example.tickets_service.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,25 +20,32 @@ import java.util.List;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
+    private final ScheduleClient scheduleClient;
 
     @Override
     public TicketResponse create(TicketRequest request) {
-        try {
-            Ticket ticket = new Ticket();
-            mapRequestToEntity(request, ticket);
-            ticket.setCreatedAt(LocalDateTime.now());
-
-            // Mặc định status active nếu null
-            if (ticket.getStatus() == null) {
-                ticket.setStatus(Ticket.Status.active);
-            }
-
-            return mapEntityToResponse(ticketRepository.save(ticket));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status value: " + request.getStatus(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating ticket: " + e.getMessage(), e);
-        }
+        // 1. Create ticket entity from request
+        Ticket ticket = new Ticket();
+        ticket.setName(request.getName());
+        ticket.setScheduleRefId(request.getScheduleRefId());
+        ticket.setPrice(request.getPrice());
+        ticket.setDescription(request.getDescription());
+        ticket.setTotalQuantity(request.getTotalQuantity());
+        
+        // 2. Fetch schedule data from API and populate snapshot fields
+        validateAndPopulateScheduleData(ticket, request.getScheduleRefId());
+        
+        // 3. Set default values
+        ticket.setSoldQuantity(0);
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setStatus(request.getStatus() != null ? 
+            Ticket.Status.valueOf(request.getStatus()) : Ticket.Status.active);
+        
+        // 4. Save ticket
+        Ticket savedTicket = ticketRepository.save(ticket);
+        
+        // 5. Return response
+        return mapEntityToResponse(savedTicket);
     }
 
     @Override
@@ -57,22 +67,46 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ticket not found with id: " + id));
 
-        // Update các trường nếu request có gửi lên (Partial update logic)
-        if (request.getName() != null) ticket.setName(request.getName());
-        if (request.getTrainNumber() != null) ticket.setTrainNumber(request.getTrainNumber());
-        if (request.getFromStation() != null) ticket.setFromStation(request.getFromStation());
-        if (request.getToStation() != null) ticket.setToStation(request.getToStation());
-        if (request.getPrice() != null) ticket.setPrice(request.getPrice());
-        if (request.getDate() != null) ticket.setDate(request.getDate());
-        if (request.getDescription() != null) ticket.setDescription(request.getDescription());
+        // Validate immutable fields - scheduleRefId cannot be modified
+        if (request.getScheduleRefId() != null && 
+            !request.getScheduleRefId().equals(ticket.getScheduleRefId())) {
+            throw new BadRequestException("Schedule reference cannot be modified");
+        }
+
+        // Update mutable fields only
+        if (request.getName() != null) {
+            ticket.setName(request.getName());
+        }
         
-        // Update quantity fields
-        if (request.getTotalQuantity() != null) ticket.setTotalQuantity(request.getTotalQuantity());
-        if (request.getSoldQuantity() != null) ticket.setSoldQuantity(request.getSoldQuantity());
+        if (request.getPrice() != null) {
+            // Validate price is positive
+            if (request.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new BadRequestException("Price must be greater than 0");
+            }
+            ticket.setPrice(request.getPrice());
+        }
+        
+        if (request.getDescription() != null) {
+            ticket.setDescription(request.getDescription());
+        }
+        
+        if (request.getTotalQuantity() != null) {
+            // Validate totalQuantity is greater than or equal to soldQuantity
+            if (request.getTotalQuantity() < ticket.getSoldQuantity()) {
+                throw new BadRequestException(
+                    String.format("Total quantity (%d) cannot be less than sold quantity (%d)", 
+                        request.getTotalQuantity(), ticket.getSoldQuantity())
+                );
+            }
+            ticket.setTotalQuantity(request.getTotalQuantity());
+        }
 
         if (request.getStatus() != null) {
             ticket.setStatus(Ticket.Status.valueOf(request.getStatus()));
         }
+
+        // Note: scheduleRefId and snapshot fields (trainNumberSnapshot, routeSnapshot, 
+        // departureTimeSnapshot) are immutable and are never modified during update
 
         return mapEntityToResponse(ticketRepository.save(ticket));
     }
@@ -116,48 +150,80 @@ public class TicketServiceImpl implements TicketService {
         return mapEntityToResponse(updatedTicket);
     }
 
-    // Mapper Helper Methods
-    private void mapRequestToEntity(TicketRequest req, Ticket entity) {
-        entity.setName(req.getName());
-        entity.setTrainNumber(req.getTrainNumber());
-        entity.setFromStation(req.getFromStation());
-        entity.setToStation(req.getToStation());
-        entity.setPrice(req.getPrice());
-        entity.setDate(req.getDate());
-        entity.setDescription(req.getDescription());
+    /**
+     * Validates schedule exists and has correct status, then populates snapshot data
+     * 
+     * @param ticket The ticket entity to populate
+     * @param scheduleRefId The schedule reference ID
+     * @throws NotFoundException if schedule is not found
+     * @throws BadRequestException if schedule status is not "scheduled"
+     */
+    private void validateAndPopulateScheduleData(Ticket ticket, Long scheduleRefId) {
+        // 1. Fetch schedule from ScheduleService via HTTP API
+        ScheduleResponse schedule = scheduleClient.getScheduleById(scheduleRefId);
         
-        // Set quantity fields
-        System.out.println("DEBUG: Request totalQuantity = " + req.getTotalQuantity());
-        System.out.println("DEBUG: Request soldQuantity = " + req.getSoldQuantity());
-        
-        if (req.getTotalQuantity() != null) {
-            entity.setTotalQuantity(req.getTotalQuantity());
-        } else {
-            entity.setTotalQuantity(0); // Default to 0 if not provided
-        }
-        if (req.getSoldQuantity() != null) {
-            entity.setSoldQuantity(req.getSoldQuantity());
-        } else {
-            entity.setSoldQuantity(0); // Default to 0 if not provided
+        // 2. Validate schedule exists (handled by client throwing NotFoundException)
+        if (schedule == null) {
+            throw new NotFoundException("Schedule not found with ID: " + scheduleRefId);
         }
         
-        System.out.println("DEBUG: Entity totalQuantity = " + entity.getTotalQuantity());
-        System.out.println("DEBUG: Entity soldQuantity = " + entity.getSoldQuantity());
-        
-        if (req.getStatus() != null) {
-            entity.setStatus(Ticket.Status.valueOf(req.getStatus()));
+        // 3. Validate schedule status is 'scheduled'
+        if (!"scheduled".equals(schedule.getStatus())) {
+            String status = schedule.getStatus();
+            if ("cancelled".equals(status)) {
+                throw new BadRequestException("Cannot create ticket for cancelled schedule");
+            } else if ("departed".equals(status)) {
+                throw new BadRequestException("Cannot create ticket for departed schedule");
+            } else {
+                throw new BadRequestException("Cannot create ticket for " + status + " schedule");
+            }
         }
+        
+        // 4. Populate snapshot fields from API response
+        populateSnapshotData(ticket, schedule);
+    }
+    
+    /**
+     * Populates snapshot data fields from schedule response
+     * 
+     * @param ticket The ticket entity to populate
+     * @param schedule The schedule response from API
+     */
+    private void populateSnapshotData(Ticket ticket, ScheduleResponse schedule) {
+        // Set snapshot data from schedule API response
+        ticket.setTrainNumberSnapshot(schedule.getTrainNumberSnapshot());
+        ticket.setRouteSnapshot(
+            schedule.getDepartureStationNameSnapshot() + " → " + 
+            schedule.getArrivalStationNameSnapshot()
+        );
+        ticket.setDepartureTimeSnapshot(schedule.getDepartureTime());
+        
+        // Set departure date from departure time
+        if (schedule.getDepartureTime() != null) {
+            ticket.setDepartureDate(schedule.getDepartureTime().toLocalDate());
+        }
+        
+        // Populate legacy fields for backward compatibility
+        ticket.setTrainNumber(schedule.getTrainNumberSnapshot());
+        ticket.setFromStation(schedule.getDepartureStationNameSnapshot());
+        ticket.setToStation(schedule.getArrivalStationNameSnapshot());
     }
 
+    // Mapper Helper Methods
     private TicketResponse mapEntityToResponse(Ticket entity) {
         TicketResponse res = new TicketResponse();
         res.setId(entity.getId());
         res.setName(entity.getName());
-        res.setTrainNumber(entity.getTrainNumber());
-        res.setFromStation(entity.getFromStation());
-        res.setToStation(entity.getToStation());
+        res.setScheduleRefId(entity.getScheduleRefId());
+        
+        // Handle potentially null snapshot data for backward compatibility
+        res.setTrainNumberSnapshot(entity.getTrainNumberSnapshot() != null ? 
+            entity.getTrainNumberSnapshot() : "N/A");
+        res.setRouteSnapshot(entity.getRouteSnapshot() != null ? 
+            entity.getRouteSnapshot() : "N/A");
+        res.setDepartureTimeSnapshot(entity.getDepartureTimeSnapshot());
+        
         res.setPrice(entity.getPrice());
-        res.setDate(entity.getDate());
         res.setDescription(entity.getDescription());
         res.setTotalQuantity(entity.getTotalQuantity());
         res.setSoldQuantity(entity.getSoldQuantity());

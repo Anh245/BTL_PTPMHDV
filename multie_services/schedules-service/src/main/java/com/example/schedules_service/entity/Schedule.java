@@ -43,6 +43,9 @@ public class Schedule {
     @Column(name = "arrival_time", nullable = false)
     private LocalDateTime arrivalTime;
 
+    @Column(name = "base_price", precision = 12, scale = 2)
+    private BigDecimal basePrice;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 

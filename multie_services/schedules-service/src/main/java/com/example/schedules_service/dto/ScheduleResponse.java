@@ -9,11 +9,15 @@ import java.time.LocalDateTime;
 @Data
 public class ScheduleResponse {
     private Long id;
-    private String trainNumber; // snapshot
-    private String departureStation; // snapshot
-    private String arrivalStation; // snapshot
+    private String trainNumber; // snapshot - for backward compatibility
+    private String trainNumberSnapshot; // for tickets service
+    private String departureStation; // snapshot - for backward compatibility
+    private String departureStationNameSnapshot; // for tickets service
+    private String arrivalStation; // snapshot - for backward compatibility
+    private String arrivalStationNameSnapshot; // for tickets service
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
+    private BigDecimal basePrice;
     private Long durationMinutes; // Tính toán thời gian di chuyển
     private Schedule.Status status;
 }

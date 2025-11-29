@@ -16,26 +16,16 @@ export default function TicketManagement() {
   }, [fetchTickets]);
 
   const handleSubmit = async (data) => {
-    try {
-      console.log('Submitting ticket data:', data); // Debug log
-      if (editingTicket) {
-        await updateTicket(editingTicket.id, data);
-        alert('Cập nhật vé thành công!');
-      } else {
-        await createTicket(data);
-        alert('Tạo vé thành công!');
-      }
-      setEditingTicket(null);
-      setShowForm(false);
-    } catch (err) {
-      console.error('Lỗi lưu vé:', err);
-      console.error('Error details:', err.response?.data);
-      const errorMsg = err.response?.data?.message 
-        || err.response?.data?.error 
-        || err.message 
-        || 'Không thể lưu vé';
-      alert(`Lỗi: ${errorMsg}\n\nChi tiết: ${JSON.stringify(err.response?.data, null, 2)}`);
+    console.log('Submitting ticket data:', data); // Debug log
+    if (editingTicket) {
+      await updateTicket(editingTicket.id, data);
+      alert('Cập nhật vé thành công!');
+    } else {
+      await createTicket(data);
+      alert('Tạo vé thành công!');
     }
+    setEditingTicket(null);
+    setShowForm(false);
   };
 
   const handleDelete = async (id) => {

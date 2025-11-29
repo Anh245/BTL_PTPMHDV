@@ -35,6 +35,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    public ScheduleResponse getById(Long id) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + id));
+        return mapToResponse(schedule);
+    }
+
+    @Override
     public ScheduleResponse update(Long id, ScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + id));
@@ -63,18 +70,30 @@ public class ScheduleServiceImpl implements ScheduleService {
         entity.setArrivalStationNameSnapshot(req.getArrivalStationNameSnapshot());
         entity.setDepartureTime(req.getDepartureTime());
         entity.setArrivalTime(req.getArrivalTime());
-        entity.setStatus(req.getStatus());
+        entity.setBasePrice(req.getBasePrice());
+        
+        // Set status with default value if null
+        entity.setStatus(req.getStatus() != null ? req.getStatus() : Schedule.Status.scheduled);
     }
 
     // Helper: Map Entity -> Response
     private ScheduleResponse mapToResponse(Schedule entity) {
         ScheduleResponse res = new ScheduleResponse();
         res.setId(entity.getId());
+        
+        // Set both field names for backward compatibility
         res.setTrainNumber(entity.getTrainNumberSnapshot());
+        res.setTrainNumberSnapshot(entity.getTrainNumberSnapshot());
+        
         res.setDepartureStation(entity.getDepartureStationNameSnapshot());
+        res.setDepartureStationNameSnapshot(entity.getDepartureStationNameSnapshot());
+        
         res.setArrivalStation(entity.getArrivalStationNameSnapshot());
+        res.setArrivalStationNameSnapshot(entity.getArrivalStationNameSnapshot());
+        
         res.setDepartureTime(entity.getDepartureTime());
         res.setArrivalTime(entity.getArrivalTime());
+        res.setBasePrice(entity.getBasePrice());
         res.setStatus(entity.getStatus());
 
         // Tính duration (phút)

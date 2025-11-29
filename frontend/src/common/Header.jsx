@@ -53,22 +53,7 @@ const Header = () => {
             {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-          >
-            <Bell className="h-5 w-5" />
-          </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-            onClick={() => navigate('/profile')}
-          >
-            <Avatar className="h-5 w-5"/>
-          </Button>
           
           {user && (
             <div className="hidden sm:flex items-center gap-3 ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">

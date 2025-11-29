@@ -1,17 +1,38 @@
-import { Edit, Trash2, Ticket, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, Trash2, Ticket, ShoppingCart, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import TicketDetails from './TicketDetails';
 
 export default function TicketList({ tickets, onEdit, onDelete, onPurchase }) {
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleViewDetails = (ticket) => {
+    setSelectedTicket(ticket);
+    setShowDetails(true);
+  };
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
   const formatDate = (date) => {
+    if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
+    });
+  };
+
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'N/A';
+    return new Date(dateTime).toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -38,14 +59,18 @@ export default function TicketList({ tickets, onEdit, onDelete, onPurchase }) {
                   <span className="font-medium text-slate-900 dark:text-slate-100">{ticket.name}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{ticket.trainNumber}</td>
               <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                {ticket.fromStation} → {ticket.toStation}
+                {ticket.trainNumberSnapshot || 'N/A'}
+              </td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                {ticket.routeSnapshot || 'N/A'}
               </td>
               <td className="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">
                 {formatPrice(ticket.price)}
               </td>
-              <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{formatDate(ticket.date)}</td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                {formatDateTime(ticket.departureTimeSnapshot)}
+              </td>
               <td className="px-6 py-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-sm">
@@ -63,17 +88,16 @@ export default function TicketList({ tickets, onEdit, onDelete, onPurchase }) {
               </td>
               <td className="px-6 py-4">
                 <div className="flex justify-end gap-2">
-                  {onPurchase && ticket.availableQuantity > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onPurchase(ticket.id)}
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      title="Mua vé"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewDetails(ticket)}
+                    className="text-slate-600 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    title="Xem chi tiết"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                 
                   <Button
                     variant="ghost"
                     size="sm"
@@ -105,6 +129,12 @@ export default function TicketList({ tickets, onEdit, onDelete, onPurchase }) {
           <p>Chưa có vé nào</p>
         </div>
       )}
+
+      <TicketDetails 
+        ticket={selectedTicket}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
     </div>
   );
 }
