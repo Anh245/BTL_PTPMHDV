@@ -21,12 +21,11 @@ import {
   AlertCircle,
   CheckCircle
 } from "lucide-react";
-import vi from '@/lib/translations';
 
 export default function Profile() {
   const userProfile = {
     name: "Sarah Johnson",
-    role: vi.profile.roles.stationManager,
+    role: "Quản lý Ga",
     email: "sarah.johnson@trainstation.com",
     phone: "+1 (555) 123-4567",
     joinDate: "Tháng 1 năm 2022",
@@ -34,37 +33,37 @@ export default function Profile() {
   };
 
   const assignedStations = [
-    { name: "Nhà ga Trung tâm", location: vi.profile.locations.downtown, status: "active", trains: 45 },
-    { name: "Nhà ga Bắc", location: vi.profile.locations.northDistrict, status: "active", trains: 32 },
-    { name: "Giao lộ Đông", location: vi.profile.locations.eastQuarter, status: "maintenance", trains: 18 },
+    { name: "Nhà ga Trung tâm", location: "Trung tâm thành phố", status: "active", trains: 45 },
+    { name: "Nhà ga Bắc", location: "Quận Bắc", status: "active", trains: 32 },
+    { name: "Giao lộ Đông", location: "Khu phố Đông", status: "maintenance", trains: 18 },
   ];
 
   const recentActivity = [
-    { action: vi.profile.recentActivity.actions.updatedSchedule, station: "Nhà ga Trung tâm", time: `2 ${vi.profile.recentActivity.time.hoursAgo}`, type: "success" },
-    { action: vi.profile.recentActivity.actions.maintenanceAlert, station: "Giao lộ Đông", time: `5 ${vi.profile.recentActivity.time.hoursAgo}`, type: "warning" },
-    { action: vi.profile.recentActivity.actions.staffMeeting, station: "Nhà ga Bắc", time: `1 ${vi.profile.recentActivity.time.daysAgo}`, type: "info" },
-    { action: vi.profile.recentActivity.actions.safetyInspection, station: "Nhà ga Trung tâm", time: `2 ${vi.profile.recentActivity.time.daysAgo}`, type: "success" },
+    { action: "Cập nhật lịch trình", station: "Nhà ga Trung tâm", time: "2 giờ trước", type: "success" },
+    { action: "Cảnh báo bảo trì", station: "Giao lộ Đông", time: "5 giờ trước", type: "warning" },
+    { action: "Họp nhân viên", station: "Nhà ga Bắc", time: "1 ngày trước", type: "info" },
+    { action: "Kiểm tra an toàn", station: "Nhà ga Trung tâm", time: "2 ngày trước", type: "success" },
   ];
 
   const stats = [
-    { label: vi.profile.stats.totalStations, value: "3", icon: MapPin },
-    { label: vi.profile.stats.activeTrains, value: "95", icon: Train },
-    { label: vi.profile.stats.staffMembers, value: "127", icon: Users },
-    { label: vi.profile.stats.avgOnTime, value: "94%", icon: Clock },
+    { label: "Tổng số ga", value: "3", icon: MapPin },
+    { label: "Tàu hoạt động", value: "95", icon: Train },
+    { label: "Nhân viên", value: "127", icon: Users },
+    { label: "Đúng giờ TB", value: "94%", icon: Clock },
   ];
 
   return (
     <div className="w-full space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{vi.profile.title}</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Hồ sơ</h1>
           <p className="mt-1.5 text-slate-600 dark:text-slate-400">
-            {vi.profile.description}
+            Quản lý cài đặt tài khoản và tùy chọn của bạn
           </p>
         </div>
         <Button variant="outline" size="sm">
           <Settings className="w-4 h-4 mr-2" />
-          {vi.common.settings}
+          Cài đặt
         </Button>
       </div>
 
@@ -92,13 +91,13 @@ export default function Profile() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
-                      <span className="text-sm">{vi.profile.joined} {userProfile.joinDate}</span>
+                      <span className="text-sm">Tham gia {userProfile.joinDate}</span>
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button>{vi.profile.editProfile}</Button>
+                  <Button>Chỉnh sửa hồ sơ</Button>
                   <Button variant="outline">
                     <Bell className="w-4 h-4" />
                   </Button>
@@ -129,17 +128,17 @@ export default function Profile() {
 
       <Tabs defaultValue="stations" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="stations">{vi.profile.tabs.stations}</TabsTrigger>
-          <TabsTrigger value="activity">{vi.profile.tabs.activity}</TabsTrigger>
-          <TabsTrigger value="preferences">{vi.profile.tabs.preferences}</TabsTrigger>
+          <TabsTrigger value="stations">Ga được giao</TabsTrigger>
+          <TabsTrigger value="activity">Hoạt động gần đây</TabsTrigger>
+          <TabsTrigger value="preferences">Tùy chọn</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stations" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{vi.profile.assignedStations.title}</CardTitle>
+              <CardTitle>Ga của bạn</CardTitle>
               <CardDescription>
-                {vi.profile.assignedStations.description}
+                Các ga dưới sự quản lý của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -156,16 +155,16 @@ export default function Profile() {
                           <p className="text-slate-600 dark:text-slate-400 text-sm mb-2">{station.location}</p>
                           <div className="flex items-center gap-2">
                             <Badge variant={station.status === "active" ? "default" : "secondary"}>
-                              {station.status}
+                              {station.status === "active" ? "Hoạt động" : "Bảo trì"}
                             </Badge>
                             <span className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-1">
                               <Train className="w-3 h-3" />
-                              {station.trains} {vi.profile.assignedStations.trainsPerDay}
+                              {station.trains} tàu/ngày
                             </span>
                           </div>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">{vi.common.viewDetails}</Button>
+                      <Button variant="outline" size="sm">Xem chi tiết</Button>
                     </div>
                     {index < assignedStations.length - 1 && <Separator className="mt-4" />}
                   </div>
@@ -178,9 +177,9 @@ export default function Profile() {
         <TabsContent value="activity" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{vi.profile.recentActivity.title}</CardTitle>
+              <CardTitle>Hoạt động gần đây</CardTitle>
               <CardDescription>
-                {vi.profile.recentActivity.description}
+                Các hành động và cập nhật gần đây của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -194,11 +193,7 @@ export default function Profile() {
                         "bg-blue-100 dark:bg-blue-900/50"
                       }`}>
                         {activity.type === "success" ? (
-                          <CheckCircle className={`w-4 h-4 ${
-                            activity.type === "success" ? "text-green-600 dark:text-green-400" :
-                            activity.type === "warning" ? "text-orange-600 dark:text-orange-400" :
-                            "text-blue-600 dark:text-blue-400"
-                          }`} />
+                          <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                         ) : activity.type === "warning" ? (
                           <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         ) : (
@@ -225,40 +220,40 @@ export default function Profile() {
         <TabsContent value="preferences" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{vi.profile.notificationPreferences.title}</CardTitle>
+              <CardTitle>Tùy chọn thông báo</CardTitle>
               <CardDescription>
-                {vi.profile.notificationPreferences.description}
+                Quản lý cách bạn nhận cập nhật
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>{vi.profile.notificationPreferences.emailNotifications}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.notificationPreferences.emailNotificationsDesc}</p>
+                  <Label>Thông báo Email</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Nhận cập nhật qua email</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>{vi.profile.notificationPreferences.maintenanceAlerts}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.notificationPreferences.maintenanceAlertsDesc}</p>
+                  <Label>Cảnh báo bảo trì</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Nhận thông báo về bảo trì ga</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>{vi.profile.notificationPreferences.scheduleChanges}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.notificationPreferences.scheduleChangesDesc}</p>
+                  <Label>Thay đổi lịch trình</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Cập nhật về thay đổi lịch trình tàu</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>{vi.profile.notificationPreferences.safetyReports}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.notificationPreferences.safetyReportsDesc}</p>
+                  <Label>Báo cáo an toàn</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Thông báo sự cố an toàn quan trọng</p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -267,37 +262,37 @@ export default function Profile() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{vi.profile.securitySettings.title}</CardTitle>
+              <CardTitle>Cài đặt bảo mật</CardTitle>
               <CardDescription>
-                {vi.profile.securitySettings.description}
+                Quản lý bảo mật tài khoản của bạn
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>{vi.profile.securitySettings.twoFactor}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.securitySettings.twoFactorDesc}</p>
+                  <Label>Xác thực hai yếu tố</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Thêm lớp bảo mật bổ sung</p>
                 </div>
                 <Switch />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5 flex-1">
-                  <Label>{vi.profile.securitySettings.password}</Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.securitySettings.passwordDesc}</p>
+                  <Label>Mật khẩu</Label>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Đã thay đổi 3 tháng trước</p>
                 </div>
-                <Button variant="outline" size="sm">{vi.profile.securitySettings.changePassword}</Button>
+                <Button variant="outline" size="sm">Đổi mật khẩu</Button>
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5 flex-1">
                   <Label className="flex items-center gap-2">
                     <Shield className="w-4 h-4" />
-                    {vi.profile.securitySettings.accessLevel}
+                    Cấp độ truy cập
                   </Label>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{vi.profile.securitySettings.accessLevelDesc}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý Ga - Toàn quyền truy cập</p>
                 </div>
-                <Badge>{vi.profile.securitySettings.verified}</Badge>
+                <Badge>Đã xác minh</Badge>
               </div>
             </CardContent>
           </Card>

@@ -1,0 +1,63 @@
+server:
+  port: 8888
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+
+      # --- BẮT ĐẦU CẤU HÌNH CORS GLOBAL ---
+      # Đoạn này sẽ tự động xử lý CORS cho tất cả các route bên dưới
+      globalcors:
+        cors-configurations:
+          '[/**]': # Áp dụng cho mọi đường dẫn
+            allowedOrigins: "http://localhost:5173" # Chỉ cho phép frontend này
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      # --- KẾT THÚC CẤU HÌNH CORS ---
+
+      routes:
+        - id: auth_route
+          uri: http://localhost:5001
+          predicates:
+            - Path=/api/auth/**
+
+        - id: schedules_route
+          uri: http://localhost:5005
+          predicates:
+            - Path=/api/schedules/**
+
+        - id: stations_route
+          uri: http://localhost:5003
+          predicates:
+            - Path=/api/stations/**
+
+        - id: trains_route
+          uri: http://localhost:5002
+          predicates:
+            - Path=/api/trains/**
+
+        - id: tickets_route
+          uri: http://localhost:5004
+          predicates:
+            - Path=/api/tickets/**
+
+        - id: orders_route
+          uri: http://localhost:5006
+          predicates:
+            - Path=/api/orders/**
+
+        - id: payment_route
+          uri: http://localhost:5007
+          predicates:
+            - Path=/api/payment/**

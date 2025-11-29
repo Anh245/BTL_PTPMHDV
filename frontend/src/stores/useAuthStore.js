@@ -1,11 +1,14 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import { authService } from "@/services/authServicesAPI.js";
 
 
 
 
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create(
+  persist(
+    (set, get) => ({
  accessToken: null,
  user: null,
  loading: false,
@@ -89,20 +92,28 @@ export const useAuthStore = create((set, get) => ({
         try {
             set({ loading: true });
 
-            const {user, fetchMe, setAccessToken} = get();
+            const {setAccessToken} = get();
             const accessToken = await authService.refresh();
             setAccessToken(accessToken);
-            if(!user){
-                await fetchMe();
-            }
+            // Không gọi fetchMe ở đây, để ProtectRoute xử lý
         } catch (error) {
             console.error("refesh that bai:", error);
-            toast.error("Phien dang het han, vui long dang nhap lai.");
+            // Không hiển thị toast ở đây vì có thể chưa có refresh token (lần đầu vào)
             get().clearState();
+            throw error; // Throw để ProtectRoute biết refresh thất bại
         } finally {
             set({ loading: false });
         }
     
 
     }
-}));
+}),
+    {
+      name: 'auth-storage', // localStorage key
+      partialPersist: (state) => ({
+        accessToken: state.accessToken,
+        user: state.user,
+      }),
+    }
+  )
+);

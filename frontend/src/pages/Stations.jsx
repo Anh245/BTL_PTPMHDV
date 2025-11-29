@@ -1,40 +1,125 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import vi from '@/lib/translations';
+import { useStationStore } from '@/stores/useStationStore';
+import StationList from '@/components/StationList';
+import StationForm from '@/components/StationForm';
 
 export default function Stations() {
+  const { stations, loading, fetchStations, createStation, updateStation, deleteStation, toggleStation } = useStationStore();
+  const [editingStation, setEditingStation] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    fetchStations();
+  }, [fetchStations]);
+
+  const handleSubmit = async (data) => {
+    try {
+      if (editingStation) {
+        await updateStation(editingStation.id, data);
+      } else {
+        await createStation(data);
+      }
+      setEditingStation(null);
+      setShowForm(false);
+    } catch (err) {
+      alert('Lỗi lưu ga: ' + err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa ga này?')) return;
+    
+    try {
+      await deleteStation(id);
+    } catch (err) {
+      alert('Lỗi xóa ga: ' + err.message);
+    }
+  };
+
+  const handleToggle = async (id) => {
+    try {
+      await toggleStation(id);
+    } catch (err) {
+      alert('Lỗi chuyển đổi trạng thái ga: ' + err.message);
+    }
+  };
+
+  const handleEdit = (station) => {
+    setEditingStation(station);
+    setShowForm(true);
+  };
+
+  const handleAdd = () => {
+    setEditingStation(null);
+    setShowForm(true);
+  };
+
+  const handleCancel = () => {
+    setEditingStation(null);
+    setShowForm(false);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{vi.stations.title}</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Quản lý Ga tàu</h1>
           <p className="mt-1.5 text-slate-600 dark:text-slate-400">
-            {vi.stations.description}
+            Quản lý tất cả các ga tàu trong hệ thống
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAdd}>
           <Plus className="w-4 h-4 mr-2" />
-          {vi.stations.addStation}
+          Thêm Ga
         </Button>
       </div>
 
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{editingStation ? 'Chỉnh sửa Ga' : 'Thêm Ga Mới'}</CardTitle>
+            <CardDescription>
+              {editingStation ? 'Cập nhật thông tin ga' : 'Nhập thông tin chi tiết cho ga mới'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StationForm 
+              initialData={editingStation} 
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            {vi.stations.management}
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-blue-600" />
+            <CardTitle>Danh sách Ga tàu</CardTitle>
+          </div>
           <CardDescription>
-            {vi.stations.comingSoonDesc}
+            Xem và quản lý tất cả các ga trong hệ thống
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-slate-500">
-            <MapPin className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-            <p className="text-lg font-medium">{vi.stations.featureComingSoon}</p>
-            <p className="text-sm mt-2">{vi.stations.createEditManage}</p>
-          </div>
+          {loading ? (
+            <div className="text-center py-8 text-slate-500">Đang tải danh sách ga...</div>
+          ) : stations.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              Không tìm thấy ga. Nhấn "Thêm Ga" để tạo mới.
+            </div>
+          ) : (
+            <StationList
+              stations={stations}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggle={handleToggle}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

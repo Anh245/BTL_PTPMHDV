@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/useAuthStore.js';
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Navigate, Outlet } from 'react-router';
 import { useEffect } from 'react';
 const ProtectRoute = () => {
@@ -7,15 +7,29 @@ const ProtectRoute = () => {
     const [starting, setStarting] = useState(true);
     const init = async() =>{
       //xay ra khi f5 trang
-
-      if(!accessToken){
-        await refresh();
+      try {
+        // Nếu không có accessToken, thử refresh
+        if(!accessToken){
+          try {
+            await refresh();
+          } catch (refreshError) {
+            // Nếu refresh fail, không làm gì - để ProtectRoute redirect về signin
+            console.error("Refresh failed:", refreshError);
+            setStarting(false);
+            return;
+          }
+        }
+        
+        // Sau khi refresh (hoặc đã có token), lấy lại accessToken mới từ store
+        const currentToken = useAuthStore.getState().accessToken;
+        if(currentToken && !user){
+          await fetchMe();
+        }
+      } catch (error) {
+        console.error("Init failed:", error);
+      } finally {
+        setStarting(false);
       }
-      if(accessToken && !user){
-        await fetchMe();
-
-      }
-      setStarting(false);
     };
     useEffect(() => {
     

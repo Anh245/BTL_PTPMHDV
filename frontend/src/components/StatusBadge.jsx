@@ -1,5 +1,3 @@
-import vi from '@/lib/translations';
-
 const StatusBadge = ({ status, type = "train" }) => {
   const styles = {
     station: {
@@ -23,29 +21,29 @@ const StatusBadge = ({ status, type = "train" }) => {
   };
 
   const text = {
-    station: {
-      true: vi.common.active,
-      false: vi.common.inactive
+    station: { 
+      true: 'Active', 
+      false: 'Inactive' 
     },
-    train: {
-      active: vi.common.active,
-      maintenance: vi.common.maintenance,
-      inactive: vi.common.inactive,
-      unknown: 'Không xác định'
+    train: { 
+      active: 'Active', 
+      maintenance: 'Maintenance', 
+      inactive: 'Inactive',
+      unknown: 'Unknown'
     },
-    schedule: {
-      scheduled: vi.dashboard.status.scheduled,
-      boarding: vi.dashboard.status.boarding,
-      departed: vi.dashboard.status.departed,
-      arrived: vi.dashboard.status.arrived,
-      delayed: vi.dashboard.status.delayed,
-      cancelled: vi.dashboard.status.cancelled
+    schedule: { 
+      scheduled: 'Scheduled', 
+      boarding: 'Boarding', 
+      departed: 'Departed', 
+      arrived: 'Arrived', 
+      delayed: 'Delayed', 
+      cancelled: 'Cancelled'
     },
   };
 
   const statusKey = String(status);
   const styleClass = styles[type]?.[statusKey] || styles.train.unknown;
-  const statusText = text[type]?.[statusKey] || 'Không xác định';
+  const statusText = text[type]?.[statusKey] || 'Unknown';
 
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styleClass}`}>

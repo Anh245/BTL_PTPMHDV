@@ -1,48 +1,33 @@
 import api from "@/lib/axios";
 
-export const authAPI = {
-  login: async (credentials) => {
-    const res = await api.post("/auth/login", credentials, { withCredentials: true });
+export const authService  = {
+  signUp: async (firstname, lastname,username, email,password) => {
+    const res= await api.post("/auth/signup", { firstname, lastname,username, email,password },{withCredentials:true});
     return res.data;
   },
-  
-  register: async (userData) => {
-    const res = await api.post("/auth/register", userData, { withCredentials: true });
-    return res.data;
-  },
-  
-  verifyToken: async (token) => {
-    const res = await api.get("/auth/verify", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return res.data;
-  },
-  
-  getUsers: async () => {
-    const res = await api.get("/auth/users");
+
+  signIn: async (username, password) => {
+    const res = await api.post("/auth/signin", { username, password },{withCredentials:true});
     return res.data;
 
+
   },
-  signIn : async (username, password) =>{
-    const res = await api.post("/auth/signin", {username , password}, {withCredentials: true} );
-      return res.data; 
-    },
-    signOut: async ()=>{
+
+
+  signOut: async ()=>{
     const res = await api.post("/auth/signout",{},{withCredentials:true});
     return res.data;
   
   },
   fetchMe: async () => {
-    const res = await api.get("/users/me", { withCredentials: true });
-    return res.data.user;
+    const res = await api.get("/auth/me", { withCredentials: true });
+    return res.data;
   },
   refresh : async () => {
     const res = await api.get("/auth/refresh", { withCredentials: true });
     return res.data.accessToken;
   }
-<<<<<<< HEAD
+  
 };
 
 export const stationAPI = {
@@ -80,8 +65,12 @@ export const scheduleAPI = {
   getTodaySchedules: () => api.get('/schedules/today'),
 };
 
+export const ticketAPI = {
+  getTickets: (params) => api.get('/tickets', { params }),
+  getTicket: (id) => api.get(`/tickets/${id}`),
+  createTicket: (data) => api.post('/tickets', data),
+  updateTicket: (id, data) => api.put(`/tickets/${id}`, data),
+  deleteTicket: (id) => api.delete(`/tickets/${id}`),
+};
+
 export default api;
-=======
-  }
-  
->>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d

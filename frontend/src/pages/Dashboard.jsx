@@ -1,43 +1,16 @@
-import {
-  MapPin,
-  Train,
-  Calendar,
+import { useEffect } from 'react';
+import { 
+  MapPin, 
+  Train, 
+  Calendar, 
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Ticket,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
-import vi from '@/lib/translations';
-
-const mockStations = {
-  total: 12,
-  stations: [
-    { _id: '1', name: 'Hanoi Station', city: 'Hanoi', isActive: true },
-    { _id: '2', name: 'Saigon Station', city: 'Ho Chi Minh City', isActive: true },
-    { _id: '3', name: 'Da Nang Station', city: 'Da Nang', isActive: false },
-    { _id: '4', name: 'Long Bien Station', city: 'Hanoi', isActive: true },
-  ]
-};
-
-const mockTrains = {
-  total: 8,
-  trains: [
-    { _id: 't1', name: 'Unity Express', trainNumber: 'SE1', status: 'active' },
-    { _id: 't2', name: 'Fast Train', trainNumber: 'TN5', status: 'maintenance' },
-    { _id: 't3', name: 'Song Lam', trainNumber: 'NA2', status: 'inactive' },
-    { _id: 't4', name: 'Sapa Express', trainNumber: 'SP3', status: 'active' },
-  ]
-};
-
-const mockTodaySchedules = [
-  { _id: 's1', trainNumber: 'SE1', route: { from: 'Hanoi', to: 'Saigon' }, schedule: { departure: '06:00', arrival: '10:00' }, status: 'departed' },
-  { _id: 's2', trainNumber: 'SP3', route: { from: 'Hanoi', to: 'Lao Cai' }, schedule: { departure: '09:15', arrival: '17:30' }, status: 'boarding' },
-  { _id: 's3', trainNumber: 'LC3', route: { from: 'Lao Cai', to: 'Hai Phong' }, schedule: { departure: '11:00', arrival: '19:45' }, status: 'scheduled' },
-  { _id: 's4', trainNumber: 'TN5', route: { from: 'Da Nang', to: 'Nha Trang' }, schedule: { departure: '13:30', arrival: '21:00' }, status: 'delayed' },
-  { _id: 's5', trainNumber: 'SE2', route: { from: 'Saigon', to: 'Hanoi' }, schedule: { departure: '14:00', arrival: '18:00' }, status: 'arrived' },
-];
-
-const mockMaintenanceTrains = [
-  { _id: 't2', name: 'Fast Train', trainNumber: 'TN5', status: 'maintenance' },
-];
+import { Button } from '@/components/ui/button';
+import { useDashboardStore } from '@/stores/useDashboardStore';
 
 const StatCard = ({ title, value, icon: Icon, color, change }) => (
   <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -81,16 +54,9 @@ const StatusBadge = ({ status, type }) => {
   };
 
   const text = {
-    station: { true: vi.common.active, false: vi.common.inactive },
-    train: { active: vi.common.active, maintenance: vi.common.maintenance, inactive: vi.common.inactive },
-    schedule: {
-      scheduled: vi.dashboard.status.scheduled,
-      boarding: vi.dashboard.status.boarding,
-      departed: vi.dashboard.status.departed,
-      arrived: vi.dashboard.status.arrived,
-      delayed: vi.dashboard.status.delayed,
-      cancelled: vi.dashboard.status.cancelled
-    },
+    station: { true: 'Hoạt động', false: 'Ngừng hoạt động' },
+    train: { active: 'Hoạt động', maintenance: 'Bảo trì', inactive: 'Ngừng hoạt động' },
+    schedule: { scheduled: 'Đã lên lịch', boarding: 'Đang lên tàu', departed: 'Đã khởi hành', arrived: 'Đã đến', delayed: 'Trễ', cancelled: 'Đã hủy'},
   };
 
   const statusKey = String(status);
@@ -105,93 +71,321 @@ const StatusBadge = ({ status, type }) => {
 };
 
 const Dashboard = () => {
+  const {
+    stats: dashboardStats,
+    allStations,
+    allTrains,
+    allTickets,
+    allSchedules,
+    todaySchedules,
+    loading,
+    error,
+    fetchDashboardData
+  } = useDashboardStore();
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const handleRefresh = async () => {
+    await fetchDashboardData();
+  };
+
   const stats = [
-    { title: vi.dashboard.stats.totalStations, value: mockStations.total, icon: MapPin, color: 'bg-blue-500', change: `+2 ${vi.dashboard.stats.thisMonth}` },
-    { title: vi.dashboard.stats.totalTrains, value: mockTrains.total, icon: Train, color: 'bg-green-500', change: `+1 ${vi.dashboard.stats.thisWeek}` },
-    { title: vi.dashboard.stats.todaySchedules, value: mockTodaySchedules.length, icon: Calendar, color: 'bg-purple-500', change: `95% ${vi.dashboard.stats.onTime}` },
-    { title: vi.dashboard.stats.needMaintenance, value: mockMaintenanceTrains.length, icon: AlertCircle, color: 'bg-red-500', change: mockMaintenanceTrains.length > 0 ? vi.dashboard.stats.requiresAttention : vi.dashboard.stats.allOk }
+    { 
+      title: 'Tổng số ga', 
+      value: dashboardStats.totalStations, 
+      icon: MapPin, 
+      color: 'bg-blue-500', 
+      change: `${allStations.filter(s => s.isActive).length} đang hoạt động` 
+    },
+    { 
+      title: 'Tổng số tàu', 
+      value: dashboardStats.totalTrains, 
+      icon: Train, 
+      color: 'bg-green-500', 
+      change: `${allTrains.filter(t => t.status === 'active').length} đang hoạt động` 
+    },
+    { 
+      title: 'Tổng số vé', 
+      value: dashboardStats.totalTickets, 
+      icon: Ticket, 
+      color: 'bg-indigo-500', 
+      change: `${allTickets.filter(t => t.status === 'active').length} đang bán` 
+    },
+    { 
+      title: 'Lịch trình hôm nay', 
+      value: dashboardStats.todaySchedules, 
+      icon: Calendar, 
+      color: 'bg-purple-500', 
+      change: `${todaySchedules.filter(s => s.status === 'scheduled').length} đã lên lịch` 
+    }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-slate-600 dark:text-slate-400">Đang tải bảng điều khiển...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <p className="text-lg font-medium text-slate-900 dark:text-slate-100">Lỗi tải bảng điều khiển</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{vi.dashboard.title}</h1>
-        <p className="mt-1.5 text-slate-600 dark:text-slate-400">
-          {vi.dashboard.description}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Tổng quan</h1>
+          <p className="mt-1.5 text-slate-600 dark:text-slate-400">
+            Tổng quan hệ thống quản lý ga tàu điện
+          </p>
+        </div>
+        <Button 
+          onClick={handleRefresh} 
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Cập nhật
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => <StatCard key={index} {...stat} />)}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Danh sách chi tiết */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Danh sách Ga */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">{vi.dashboard.sections.recentStations}</h3>
-          <div className="p-5 space-y-4">
-            {mockStations.stations.map((station) => (
-              <div key={station._id} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{station.name}</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{station.city}</p>
-                  </div>
-                </div>
-                <StatusBadge status={station.isActive} type="station" />
-              </div>
-            ))}
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">
+            Danh sách Ga ({allStations.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+              <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+                <tr>
+                  <th scope="col" className="px-4 py-3">Tên ga</th>
+                  <th scope="col" className="px-4 py-3">Địa chỉ</th>
+                  <th scope="col" className="px-4 py-3">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {allStations.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="px-4 py-8 text-center text-slate-500">
+                      Không có ga nào
+                    </td>
+                  </tr>
+                ) : (
+                  allStations.slice(0, 10).map((station) => (
+                    <tr key={station.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{station.name}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300 max-w-xs truncate">
+                        {station.address || 'Chưa có địa chỉ'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={station.isActive} type="station" />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-        
+
+        {/* Danh sách Tàu */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">{vi.dashboard.sections.recentTrains}</h3>
-          <div className="p-5 space-y-4">
-            {mockTrains.trains.map((train) => (
-              <div key={train._id} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                    <Train className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{train.name}</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{train.trainNumber}</p>
-                  </div>
-                </div>
-                <StatusBadge status={train.status} type="train" />
-              </div>
-            ))}
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">
+            Danh sách Tàu ({allTrains.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+              <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+                <tr>
+                  <th scope="col" className="px-4 py-3">Tên tàu</th>
+                  <th scope="col" className="px-4 py-3">Số hiệu</th>
+                  
+                  <th scope="col" className="px-4 py-3">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {allTrains.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500">
+                      Không có tàu nào
+                    </td>
+                  </tr>
+                ) : (
+                  allTrains.slice(0, 10).map((train) => (
+                    <tr key={train.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{train.name}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{train.trainNumber}</td>
+                      
+                      <td className="px-4 py-3">
+                        <StatusBadge status={train.status} type="train" />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
+      {/* Danh sách Vé và Lịch trình */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Danh sách Vé */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">
+            Danh sách Vé ({allTickets.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+              <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+                <tr>
+                  <th scope="col" className="px-4 py-3">Tên vé</th>
+                  <th scope="col" className="px-4 py-3">Tuyến</th>
+                  <th scope="col" className="px-4 py-3">Giá</th>
+                  <th scope="col" className="px-4 py-3">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {allTickets.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500">
+                      Không có vé nào
+                    </td>
+                  </tr>
+                ) : (
+                  allTickets.slice(0, 10).map((ticket) => (
+                    <tr key={ticket.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{ticket.name}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {ticket.fromStation} → {ticket.toStation}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(ticket.price)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={ticket.status} type="station" />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Danh sách Lịch trình */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">
+            Tất cả Lịch trình ({allSchedules.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+              <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+                <tr>
+                  <th scope="col" className="px-4 py-3">Tàu</th>
+                  <th scope="col" className="px-4 py-3">Tuyến</th>
+                  <th scope="col" className="px-4 py-3">Khởi hành</th>
+                  <th scope="col" className="px-4 py-3">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {allSchedules.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500">
+                      Không có lịch trình nào
+                    </td>
+                  </tr>
+                ) : (
+                  allSchedules.slice(0, 10).map((schedule) => (
+                    <tr key={schedule.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{schedule.trainNumber}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {schedule.departureStation} → {schedule.arrivalStation}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        {new Date(schedule.departureTime).toLocaleDateString('vi-VN')} {new Date(schedule.departureTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={schedule.status} type="schedule" />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Lịch trình hôm nay */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 p-5 border-b border-slate-200 dark:border-slate-700">{vi.dashboard.sections.todaySchedule}</h3>
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">
+            Lịch trình hôm nay ({todaySchedules.length})
+          </h3>
+          <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
+            <Clock className="h-4 w-4 mr-1" />
+            {new Date().toLocaleDateString('vi-VN')}
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-slate-500 dark:text-slate-400">
             <thead className="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
               <tr>
-                <th scope="col" className="px-6 py-3">{vi.dashboard.table.train}</th>
-                <th scope="col" className="px-6 py-3">{vi.dashboard.table.route}</th>
-                <th scope="col" className="px-6 py-3">{vi.dashboard.table.departure}</th>
-                <th scope="col" className="px-6 py-3">{vi.dashboard.table.arrival}</th>
-                <th scope="col" className="px-6 py-3">{vi.dashboard.table.status}</th>
+                <th scope="col" className="px-6 py-3">Tàu</th>
+                <th scope="col" className="px-6 py-3">Tuyến đường</th>
+                <th scope="col" className="px-6 py-3">Khởi hành</th>
+                <th scope="col" className="px-6 py-3">Đến nơi</th>
+                <th scope="col" className="px-6 py-3">Ghế trống</th>
+                <th scope="col" className="px-6 py-3">Trạng thái</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-slate-200 dark:divide-slate-700'>
-              {mockTodaySchedules.slice(0, 10).map((schedule) => (
-                <tr key={schedule._id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{schedule.trainNumber}</td>
-                  <td className="px-6 py-4">{schedule.route.from} → {schedule.route.to}</td>
-                  <td className="px-6 py-4">{schedule.schedule.departure}</td>
-                  <td className="px-6 py-4">{schedule.schedule.arrival}</td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={schedule.status} type="schedule" />
+              {todaySchedules.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
+                    Không có lịch trình hôm nay
                   </td>
                 </tr>
-              ))}
+              ) : (
+                todaySchedules.map((schedule) => (
+                  <tr key={schedule.id} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{schedule.trainNumber}</td>
+                    <td className="px-6 py-4">{schedule.departureStation} → {schedule.arrivalStation}</td>
+                    <td className="px-6 py-4">{new Date(schedule.departureTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td className="px-6 py-4">{new Date(schedule.arrivalTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td className="px-6 py-4">
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">
+                        {schedule.availableSeats || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <StatusBadge status={schedule.status} type="schedule" />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

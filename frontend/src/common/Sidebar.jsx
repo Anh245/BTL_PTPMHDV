@@ -1,23 +1,26 @@
-import { NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  MapPin,
-  Train,
-  Calendar,
+import { NavLink } from 'react-router-dom'
+import { 
+  LayoutDashboard, 
+  MapPin, 
+  Train, 
+  Calendar, 
   User,
   Menu,
-  X
-} from 'lucide-react';
-import { useState } from 'react';
-import vi from '@/lib/translations';
+  X,
+  Ticket
+} from 'lucide-react'
+import { useState } from 'react'
+
+
 
 const navigation = [
-  { name: vi.sidebar.dashboard, href: '/dashboard', icon: LayoutDashboard },
-  { name: vi.sidebar.stations, href: '/stations', icon: MapPin },
-  { name: vi.sidebar.trains, href: '/trains', icon: Train },
-  { name: vi.sidebar.schedules, href: '/schedules', icon: Calendar },
-  { name: vi.sidebar.profile, href: '/profile', icon: User },
-];
+  { name: 'Dashboard', href: '/admin-dashboard', icon: LayoutDashboard },
+  { name: 'Ga tàu', href: '/stations', icon: MapPin },
+  { name: 'Tàu', href: '/trains', icon: Train },
+  { name: 'Lịch trình', href: '/schedules', icon: Calendar },
+  { name: 'Vé tàu', href: '/tickets', icon: Ticket },
+  
+]
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,11 +41,11 @@ const Sidebar = () => {
         lg:translate-x-0 lg:static lg:inset-0 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center justify-center h-16 px-4 bg-blue-600 dark:bg-blue-700">
-          <h1 className="text-xl font-bold text-white">{vi.sidebar.title}</h1>
+        <div className="flex items-center justify-center h-20% px-4 bg-blue-500 h-17">
+          <h1 className="text-xl font-bold text-black ">🚉 Train Station</h1>
         </div>
         
-        <nav className="mt-8 px-4">
+        <nav className="mt-8 px-4 h-128">
           <ul className="space-y-2">
             {navigation.map((item) => (
               <li key={item.name}>
@@ -57,7 +60,7 @@ const Sidebar = () => {
                     }`
                   }
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className="mr-3 h-5 w-19" />
                   {item.name}
                 </NavLink>
               </li>

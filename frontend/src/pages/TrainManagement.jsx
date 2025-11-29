@@ -1,53 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import useTrains from '../hooks/useTrains';
+import { useTrainStore } from '@/stores/useTrainStore';
 import TrainList from '../components/TrainList';
 import TrainForm from '../components/TrainForm';
-import * as trainService from '../services/trainService';
-import vi from '@/lib/translations';
 
 export default function TrainManagement() {
-  const { trains, loading, fetchTrains } = useTrains();
+  const { trains, loading, fetchTrains, createTrain, updateTrain, deleteTrain, updateTrainStatus } = useTrainStore();
   const [editingTrain, setEditingTrain] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    fetchTrains();
+  }, [fetchTrains]);
 
   const handleSubmit = async (data) => {
     try {
       if (editingTrain) {
-        await trainService.updateTrain(editingTrain.id, data);
+        await updateTrain(editingTrain.id, data);
       } else {
-        await trainService.createTrain(data);
+        await createTrain(data);
       }
       setEditingTrain(null);
       setShowForm(false);
-      fetchTrains();
     } catch (err) {
-      console.error('Error saving train:', err);
+      alert('Lỗi lưu tàu: ' + err.message);
     }
   };
 
   const handleDelete = async (id) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa tàu này?')) return;
+    
     try {
-      await trainService.deleteTrain(id);
-      fetchTrains();
+      await deleteTrain(id);
     } catch (err) {
-      console.error('Error deleting train:', err);
+      alert('Lỗi xóa tàu: ' + err.message);
     }
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await trainService.updateTrainStatus(id, newStatus);
-      fetchTrains();
+      await updateTrainStatus(id, newStatus);
     } catch (err) {
-      console.error('Error updating status:', err);
+      alert('Lỗi cập nhật trạng thái: ' + err.message);
     }
   };
 
   const handleEdit = (train) => {
     setEditingTrain(train);
+    setShowForm(true);
+  };
+
+  const handleAdd = () => {
+    setEditingTrain(null);
     setShowForm(true);
   };
 
@@ -60,23 +66,23 @@ export default function TrainManagement() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{vi.trains.title}</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Quản lý Tàu</h1>
           <p className="mt-1.5 text-slate-600 dark:text-slate-400">
-            {vi.trains.description}
+            Quản lý đoàn tàu và hoạt động vận hành
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
+        <Button onClick={handleAdd}>
           <Plus className="w-4 h-4 mr-2" />
-          {vi.trains.addTrain}
+          Thêm Tàu
         </Button>
       </div>
 
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>{editingTrain ? vi.trains.editTrain : vi.trains.addNewTrain}</CardTitle>
+            <CardTitle>{editingTrain ? 'Chỉnh sửa Tàu' : 'Thêm Tàu Mới'}</CardTitle>
             <CardDescription>
-              {editingTrain ? vi.trains.updateTrainInfo : vi.trains.enterDetails}
+              {editingTrain ? 'Cập nhật thông tin tàu' : 'Nhập thông tin chi tiết cho tàu mới'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -91,17 +97,17 @@ export default function TrainManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{vi.trains.trainList}</CardTitle>
+          <CardTitle>Danh sách Tàu</CardTitle>
           <CardDescription>
-            {vi.trains.viewAndManage}
+            Xem và quản lý tất cả các tàu trong hệ thống
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-slate-500">{vi.trains.loadingTrains}</div>
+            <div className="text-center py-8 text-slate-500">Đang tải danh sách tàu...</div>
           ) : trains.length === 0 ? (
             <div className="text-center py-8 text-slate-500">
-              {vi.trains.noTrains}
+              Không tìm thấy tàu. Nhấn "Thêm Tàu" để tạo mới.
             </div>
           ) : (
             <TrainList

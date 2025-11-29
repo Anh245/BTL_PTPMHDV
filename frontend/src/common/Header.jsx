@@ -1,13 +1,12 @@
-<<<<<<< HEAD
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth.jsx';
-import { LogOut, Bell, Settings, Moon, Sun } from 'lucide-react';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { LogOut, Bell, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import vi from '@/lib/translations';
+import { Avatar } from '@radix-ui/react-avatar';
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
 
@@ -30,25 +29,17 @@ const Header = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/signin');
   };
-=======
-
-import { useAuthStore } from '@/stores/useAuthStore.js'
-import { LogOut, Bell, Settings } from 'lucide-react'
-
-const Header = () => {
-  const { user, logout } = useAuthStore()
->>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
 
   return (
     <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 hidden sm:block">
-            {vi.header.title}
+            Quản lý Ga Tàu Điện
           </h2>
         </div>
         
@@ -76,18 +67,17 @@ const Header = () => {
             className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             onClick={() => navigate('/profile')}
           >
-            <Settings className="h-5 w-5" />
+            <Avatar className="h-5 w-5"/>
           </Button>
           
-<<<<<<< HEAD
           {user && (
             <div className="hidden sm:flex items-center gap-3 ml-2 pl-2 border-l border-slate-200 dark:border-slate-700">
               <div className="text-right">
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {user?.username || vi.common.user}
+                  {user?.username || 'User'}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
-                  {user?.role || vi.common.member}
+                  {user?.role || 'Member'}
                 </p>
               </div>
               
@@ -96,17 +86,6 @@ const Header = () => {
                   {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
-=======
-          {/* User menu */}
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">
-                {user?.username}
-              </p>
-              <p className="text-xs text-gray-500 capitalize">
-                Them role cho doi tuong 
-              </p>
->>>>>>> dbfc5309050f543f5c279a9d7a59da6924c73a6d
             </div>
           )}
           
@@ -115,7 +94,7 @@ const Header = () => {
             size="icon"
             onClick={handleLogout}
             className="text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
-            title={vi.common.logout}
+            title="Đăng xuất"
           >
             <LogOut className="h-5 w-5" />
           </Button>
