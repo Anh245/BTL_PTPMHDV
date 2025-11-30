@@ -9,15 +9,10 @@ import java.time.LocalDateTime;
 public class TicketResponse {
     private Long id;
     private String name;
-    
-    // Schedule reference
     private Long scheduleRefId;
-    
-    // Snapshot data
     private String trainNumberSnapshot;
     private String routeSnapshot;
     private LocalDateTime departureTimeSnapshot;
-    
     private BigDecimal price;
     private String description;
     private Integer totalQuantity; // Tổng số vé
