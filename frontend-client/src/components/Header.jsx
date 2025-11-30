@@ -1,24 +1,18 @@
 import { Train, Menu, X, User, LogOut } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import useAuthStore from '../stores/useAuthStore';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const currentUser = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      setCurrentUser(JSON.parse(user));
-    }
-  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    setCurrentUser(null);
+    logout();
     alert('Đã đăng xuất thành công!');
     navigate('/');
   };
@@ -47,10 +41,10 @@ const Header = () => {
             </a>
             {currentUser ? (
               <>
-                <div className="flex items-center gap-2 text-gray-700 font-semibold">
+                <Link to="/account" className="flex items-center gap-2 text-gray-700 hover:text-primary-600 font-semibold transition-colors">
                   <User className="w-5 h-5 text-primary-600" />
                   <span>{currentUser.fullName}</span>
-                </div>
+                </Link>
                 <button onClick={handleLogout} className="btn-secondary py-2 px-4 flex items-center gap-2">
                   <LogOut className="w-4 h-4" />
                   Đăng xuất
@@ -89,10 +83,10 @@ const Header = () => {
             </a>
             {currentUser ? (
               <>
-                <div className="flex items-center gap-2 text-gray-700 font-semibold py-2">
+                <Link to="/account" className="flex items-center gap-2 text-gray-700 hover:text-primary-600 font-semibold py-2 transition-colors">
                   <User className="w-5 h-5 text-primary-600" />
                   <span>{currentUser.fullName}</span>
-                </div>
+                </Link>
                 <button onClick={handleLogout} className="btn-secondary w-full text-center flex items-center justify-center gap-2">
                   <LogOut className="w-4 h-4" />
                   Đăng xuất

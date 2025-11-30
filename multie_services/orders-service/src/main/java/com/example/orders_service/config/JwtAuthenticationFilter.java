@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Claims body = claimsJws.getBody();
 
                 String username = body.getSubject();
+                Integer userId = body.get("userId", Integer.class);
 
                 // 2. Lấy role từ claim "role" (theo code auth-service bạn cung cấp)
                 String role = body.get("role", String.class);
@@ -52,9 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority(authorityRole);
 
+                    // Store userId as principal so it can be accessed in controllers
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
-                                    username,
+                                    userId != null ? userId : username, // Use userId as principal
                                     null,
                                     Collections.singletonList(authority) // Chỉ có 1 role
                             );

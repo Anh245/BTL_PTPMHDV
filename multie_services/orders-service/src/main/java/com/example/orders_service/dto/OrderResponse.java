@@ -26,4 +26,9 @@ public class OrderResponse {
     private String orderStatus;
 
     private LocalDateTime createdAt;
+    
+    // New fields for booking management
+    private String passengerDetails;
+    private String confirmationCode;
+    private LocalDateTime confirmedAt;
 }

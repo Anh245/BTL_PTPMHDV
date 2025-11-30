@@ -1,17 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Train, Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { Train, User } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+    username: '',
     agreeToTerms: false
   });
 
@@ -26,11 +21,6 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu không khớp!');
-      return;
-    }
-
     if (!formData.agreeToTerms) {
       alert('Vui lòng đồng ý với Điều khoản và Điều kiện');
       return;
@@ -38,18 +28,16 @@ const Register = () => {
 
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
-    const existingUser = users.find(user => user.email === formData.email);
+    const existingUser = users.find(user => user.username === formData.username);
     if (existingUser) {
-      alert('Email này đã được đăng ký!');
+      alert('Tên đăng nhập này đã được sử dụng!');
       return;
     }
 
     const newUser = {
       id: Date.now().toString(),
       fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      password: formData.password,
+      username: formData.username,
       registeredAt: new Date().toISOString()
     };
 
@@ -97,110 +85,23 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                Địa chỉ Email
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                Tên đăng nhập
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="username"
+                  name="username"
+                  type="text"
                   required
-                  value={formData.email}
+                  value={formData.username}
                   onChange={handleChange}
                   className="input-field pl-10"
-                  placeholder="ban@example.com"
+                  placeholder="nguyenvana"
                 />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                Số điện thoại
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="+84 (123) 456-789"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pl-10 pr-10"
-                  placeholder="••••••••"
-                  minLength="8"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
-                Xác nhận mật khẩu
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input-field pl-10 pr-10"
-                  placeholder="••••••••"
-                  minLength="8"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
               </div>
             </div>
 

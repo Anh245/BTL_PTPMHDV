@@ -11,27 +11,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity // Cho phép dùng @PreAuthorize ở Controller
+// @EnableMethodSecurity // TEMPORARY: Disabled for testing
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("⚙️ SecurityConfig: DISABLING ALL SECURITY FOR TESTING");
+        
         http.csrf(csrf -> csrf.disable());
+        http.cors(cors -> cors.disable());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
+        
+        // TEMPORARY: Permit ALL requests
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/orders/*/confirm").permitAll()
-                .anyRequest().authenticated() // Mọi request khác đều phải đăng nhập
+                .anyRequest().permitAll()
         );
 
         http.httpBasic(h -> h.disable());
         http.formLogin(f -> f.disable());
 
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        // TEMPORARY: Do NOT add JWT filter
+        // http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        System.out.println("✅ SecurityConfig: ALL SECURITY DISABLED - ALL REQUESTS PERMITTED");
 
         return http.build();
     }

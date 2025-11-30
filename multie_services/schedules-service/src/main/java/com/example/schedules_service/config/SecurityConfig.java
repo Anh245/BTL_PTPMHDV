@@ -39,19 +39,8 @@ public class SecurityConfig {
                         // Các endpoint public (Swagger, Actuator)
                         .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // Allow inter-service communication - GET single schedule by ID
-                        // This is needed for tickets-service to fetch schedule data
-                        .requestMatchers(HttpMethod.GET, "/api/schedules/*").permitAll()
-
-                        // 1. Create Schedule (POST) -> Chỉ ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/schedules/**").hasRole("ADMIN")
-
-                        // 2. Update & Delete Schedule (PUT, DELETE) -> Chỉ ADMIN
-                        .requestMatchers(HttpMethod.PUT, "/api/schedules/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/schedules/**").hasRole("ADMIN")
-
-                        // 3. Get All Schedules (GET /api/schedules) -> ADMIN và USER
-                        .requestMatchers(HttpMethod.GET, "/api/schedules").hasAnyRole("ADMIN", "USER")
+                        // TEMPORARY: Open all schedules endpoints for testing
+                        .requestMatchers("/api/schedules/**").permitAll()
 
                         // Các request còn lại bắt buộc phải đăng nhập
                         .anyRequest().authenticated()

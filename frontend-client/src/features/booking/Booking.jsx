@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Train, Clock, Calendar, MapPin, User, CreditCard, Ticket } from 'lucide-react';
+import { ArrowLeft, Train, Clock, Calendar, MapPin, CreditCard, Ticket } from 'lucide-react';
 import Header from '../../shared/components/Header';
 import Footer from '../../shared/components/Footer';
+import { stationAPI } from '../../services/stationService';
 
 const Booking = () => {
   const location = useLocation();
@@ -10,15 +11,9 @@ const Booking = () => {
   const searchData = location.state;
 
   const [selectedTrain, setSelectedTrain] = useState(null);
-  const [passengerInfo, setPassengerInfo] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    idNumber: '',
-    numberOfTickets: 1
-  });
-
-  const stations = ['Nhổn', 'Minh Khai', 'Phú Diễn', 'Cầu Diễn', 'Lê Đức Thọ', 'Đại học Quốc gia', 'Chùa Hà', 'Cầu Giấy'];
+  const [numberOfTickets, setNumberOfTickets] = useState(1);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [stations, setStations] = useState([]);
 
   const calculatePrice = (departure, destination) => {
     const departureIndex = stations.indexOf(departure);
@@ -34,12 +29,36 @@ const Booking = () => {
   };
 
   useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const data = await stationAPI.getActiveStations();
+        setStations(data.map(station => station.name || station.code));
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách ga:', error);
+        setStations([]);
+        alert('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend.');
+      }
+    };
+
+    fetchStations();
+  }, []);
+
+  useEffect(() => {
     if (!searchData) {
       navigate('/');
+      return;
     }
+
+    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if (!user) {
+      alert('Vui lòng đăng nhập để đặt vé');
+      navigate('/login');
+      return;
+    }
+    setCurrentUser(user);
   }, [searchData, navigate]);
 
-  if (!searchData) {
+  if (!searchData || !currentUser) {
     return null;
   }
 
@@ -92,14 +111,6 @@ const Booking = () => {
     window.scrollTo({ top: document.getElementById('booking-form').offsetTop - 100, behavior: 'smooth' });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPassengerInfo({
-      ...passengerInfo,
-      [name]: name === 'numberOfTickets' ? parseInt(value) : value
-    });
-  };
-
   const handleBooking = (e) => {
     e.preventDefault();
     if (!selectedTrain) {
@@ -107,7 +118,7 @@ const Booking = () => {
       return;
     }
 
-    if (passengerInfo.numberOfTickets > selectedTrain.availableSeats) {
+    if (numberOfTickets > selectedTrain.availableSeats) {
       alert(`Chỉ còn ${selectedTrain.availableSeats} chỗ trống`);
       return;
     }
@@ -115,9 +126,13 @@ const Booking = () => {
     const bookingDetails = {
       id: Date.now().toString(),
       train: selectedTrain,
-      passenger: passengerInfo,
+      passenger: {
+        fullName: currentUser.fullName,
+        username: currentUser.username,
+        numberOfTickets: numberOfTickets
+      },
       searchData: searchData,
-      totalPrice: selectedTrain.price * passengerInfo.numberOfTickets,
+      totalPrice: selectedTrain.price * numberOfTickets,
       bookingDate: new Date().toISOString(),
       status: 'confirmed',
       paidAt: new Date().toISOString()
@@ -127,7 +142,7 @@ const Booking = () => {
     existingBookings.push(bookingDetails);
     localStorage.setItem('trainBookings', JSON.stringify(existingBookings));
 
-    alert(`Đặt vé thành công!\nChuyến tàu: ${selectedTrain.name}\nSố vé: ${passengerInfo.numberOfTickets}\nTổng tiền: ${bookingDetails.totalPrice.toLocaleString('vi-VN')} VNĐ\n\nMã đặt vé: ${bookingDetails.id}`);
+    alert(`Đặt vé thành công!\nHành khách: ${currentUser.fullName}\nChuyến tàu: ${selectedTrain.name}\nSố vé: ${numberOfTickets}\nTổng tiền: ${bookingDetails.totalPrice.toLocaleString('vi-VN')} VNĐ\n\nMã đặt vé: ${bookingDetails.id}`);
 
     navigate('/my-tickets');
   };
@@ -249,103 +264,47 @@ const Booking = () => {
 
         {selectedTrain && (
           <div id="booking-form" className="bg-white rounded-xl shadow-md p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Thông tin hành khách</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Thông tin đặt vé</h2>
             
+            <div className="bg-primary-50 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Thông tin hành khách</h3>
+              <div className="space-y-2 text-gray-700">
+                <p><span className="font-semibold">Họ và tên:</span> {currentUser.fullName}</p>
+                <p><span className="font-semibold">Tên đăng nhập:</span> {currentUser.username}</p>
+              </div>
+            </div>
+
             <form onSubmit={handleBooking} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                    <User className="w-5 h-5 text-primary-600" />
-                    Họ và tên
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={passengerInfo.fullName}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                    placeholder="Nhập họ và tên"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={passengerInfo.email}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                    placeholder="example@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    Số điện thoại
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={passengerInfo.phone}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                    placeholder="0123456789"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    Số CMND/CCCD
-                  </label>
-                  <input
-                    type="text"
-                    name="idNumber"
-                    value={passengerInfo.idNumber}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                    placeholder="Nhập số CMND/CCCD"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                    <Ticket className="w-5 h-5 text-primary-600" />
-                    Số lượng vé
-                  </label>
-                  <input
-                    type="number"
-                    name="numberOfTickets"
-                    value={passengerInfo.numberOfTickets}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    required
-                    min="1"
-                    max={selectedTrain.availableSeats}
-                    placeholder="Nhập số lượng vé"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Tối đa {selectedTrain.availableSeats} vé
-                  </p>
-                </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-primary-600" />
+                  Số lượng vé
+                </label>
+                <input
+                  type="number"
+                  value={numberOfTickets}
+                  onChange={(e) => setNumberOfTickets(parseInt(e.target.value))}
+                  className="input-field"
+                  required
+                  min="1"
+                  max={selectedTrain.availableSeats}
+                  placeholder="Nhập số lượng vé"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Tối đa {selectedTrain.availableSeats} vé
+                </p>
               </div>
 
               <div className="bg-primary-50 rounded-lg p-6 mt-8">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-semibold text-gray-800">Tổng tiền:</span>
                   <span className="text-3xl font-bold text-primary-600">
-                    {formatPrice(selectedTrain.price * passengerInfo.numberOfTickets)}
+                    {formatPrice(selectedTrain.price * numberOfTickets)}
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 space-y-1">
                   <p>Chuyến tàu: {selectedTrain.name}</p>
-                  <p>Số lượng vé: {passengerInfo.numberOfTickets}</p>
+                  <p>Số lượng vé: {numberOfTickets}</p>
                   <p>Giá mỗi vé: {formatPrice(selectedTrain.price)}</p>
                   <p>Ngày đi: {new Date(searchData.date).toLocaleDateString('vi-VN')}</p>
                   <p>Giờ khởi hành: {selectedTrain.departureTime}</p>

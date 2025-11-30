@@ -29,28 +29,43 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentResponse processPayment(PaymentRequest request) {
 
-        // 1. [MỚI] Kiểm tra xem cổng thanh toán có tồn tại và đang active không
-        // Method findByNameAndIsActiveTrue đã có sẵn trong file repository bạn upload
-        PaymentGateway gateway = paymentGatewayRepository.findByNameAndIsActiveTrue(request.getPaymentMethod())
-                .orElseThrow(() -> new RuntimeException("Cổng thanh toán không hỗ trợ hoặc đang bảo trì: " + request.getPaymentMethod()));
+        // 1. Kiểm tra xem cổng thanh toán có tồn tại và đang active không
+        PaymentGateway gateway = null;
+        String paymentMethod = request.getPaymentMethod();
+        
+        // Xử lý đặc biệt cho cash payment (không cần gateway)
+        if (!"cash".equalsIgnoreCase(paymentMethod)) {
+            gateway = paymentGatewayRepository.findByNameAndIsActiveTrue(paymentMethod)
+                    .orElseThrow(() -> new RuntimeException("Cổng thanh toán không hỗ trợ hoặc đang bảo trì: " + paymentMethod));
+        }
 
         // 2. Tạo bản ghi Transaction (Pending)
         Transaction transaction = new Transaction();
         transaction.setOrderId(request.getOrderId());
         transaction.setAmount(request.getAmount());
-        transaction.setPaymentMethod(gateway.getName()); // Lấy tên chuẩn từ DB
+        transaction.setPaymentMethod(paymentMethod);
         transaction.setTransactionDate(LocalDateTime.now());
         transaction.setStatus(Transaction.Status.PENDING);
 
         // 3. Lưu log Request gửi đi
-        // Giả lập việc dùng ApiKeyPublic từ DB để gửi sang đối tác
-        String mockRequestLog = String.format(
-                "{\"gateway\": \"%s\", \"key\": \"%s\", \"amount\": %s, \"orderInfo\": \"Order %d\"}",
-                gateway.getName(),
-                gateway.getApiKeyPublic(), // Dùng key lấy từ DB để log minh họa
-                request.getAmount(),
-                request.getOrderId()
-        );
+        String mockRequestLog;
+        if (gateway != null) {
+            // Có gateway (credit_card, ewallet, etc.)
+            mockRequestLog = String.format(
+                    "{\"gateway\": \"%s\", \"key\": \"%s\", \"amount\": %s, \"orderInfo\": \"Order %d\"}",
+                    gateway.getName(),
+                    gateway.getApiKeyPublic(),
+                    request.getAmount(),
+                    request.getOrderId()
+            );
+        } else {
+            // Cash payment - không cần gateway
+            mockRequestLog = String.format(
+                    "{\"method\": \"cash\", \"amount\": %s, \"orderInfo\": \"Order %d\"}",
+                    request.getAmount(),
+                    request.getOrderId()
+            );
+        }
         transaction.setRequestLog(mockRequestLog);
 
         // ... Các bước xử lý tiếp theo (Giả lập thanh toán, gọi Orders Service...) giữ nguyên như code cũ
@@ -79,19 +94,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         try {
 
-            // Giả sử Orders Service có endpoint nội bộ: PUT /api/orders/{id}/internal/confirm-payment
+            // TODO: Trong production, Orders Service sẽ poll Payment Service để check status
+            // Hoặc dùng message queue (Kafka/RabbitMQ) để tránh circular dependency
+            
+            // TEMPORARY: Comment out để tránh circular call
+            // String url = ordersServiceUrl + "/" + orderId + "/confirm";
+            // restTemplate.put(url, null);
 
-            // Cần truyền token nội bộ hoặc cấu hình bảo mật để cho phép Payment Service gọi
-
-            // Ở đây demo gọi trực tiếp (Cần bổ sung endpoint bên Orders Service)
-
-            String url = ordersServiceUrl + "/" + orderId + "/confirm";
-
-            restTemplate.put(url, null); // <--- BỎ COMMENT DÒNG NÀY
-
-            // restTemplate.put(url, null); // Uncomment khi Orders Service đã có API này
-
-            System.out.println("Đã gọi update Order ID: " + orderId + " sang trạng thái PAID");
+            System.out.println("Payment processed for Order ID: " + orderId);
+            System.out.println("Note: Order status will be updated by Orders Service polling or webhook");
 
         } catch (Exception e) {
 

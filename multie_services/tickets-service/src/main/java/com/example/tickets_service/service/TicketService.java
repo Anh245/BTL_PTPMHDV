@@ -12,4 +12,6 @@ public interface TicketService {
     TicketResponse update(Long id, TicketRequest request);
     void delete(Long id);
     TicketResponse purchaseTickets(Long id, Integer quantity);
+    void decreaseQuantity(Long ticketId, Integer quantity);
+    void increaseQuantity(Long ticketId, Integer quantity);
 }

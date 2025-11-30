@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Train, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Train, User } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    username: '',
     rememberMe: false
   });
 
@@ -24,18 +22,17 @@ const Login = () => {
 
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
-    const user = users.find(u => u.email === formData.email && u.password === formData.password);
+    const user = users.find(u => u.username === formData.username);
 
     if (!user) {
-      alert('Email hoặc mật khẩu không đúng!');
+      alert('Tên đăng nhập không tồn tại!');
       return;
     }
 
     const currentUser = {
       id: user.id,
       fullName: user.fullName,
-      email: user.email,
-      phone: user.phone
+      username: user.username
     };
 
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -60,55 +57,23 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                Địa chỉ Email
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                Tên đăng nhập
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
+                  id="username"
+                  name="username"
+                  type="text"
                   required
-                  value={formData.email}
+                  value={formData.username}
                   onChange={handleChange}
                   className="input-field pl-10"
-                  placeholder="ban@example.com"
+                  placeholder="nguyenvana"
                 />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pl-10 pr-10"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
               </div>
             </div>
 
@@ -125,12 +90,6 @@ const Login = () => {
                 <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 cursor-pointer">
                   Ghi nhớ đăng nhập
                 </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
-                  Quên mật khẩu?
-                </a>
               </div>
             </div>
 

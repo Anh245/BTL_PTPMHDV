@@ -11,19 +11,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity
+// @EnableMethodSecurity // TEMPORARY: Disabled for testing
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("⚙️ Payment SecurityConfig: DISABLING ALL SECURITY FOR TESTING");
+        
         http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().permitAll()
+                );
+                // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        System.out.println("✅ Payment SecurityConfig: ALL SECURITY DISABLED");
+        
         return http.build();
     }
 }

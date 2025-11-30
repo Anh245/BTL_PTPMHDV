@@ -11,4 +11,6 @@ public interface OrderService {
     OrderResponse getOrderById(Integer id);
     void deleteOrder(Integer id);
     OrderResponse confirmPayment(Integer id);
+    OrderResponse cancelOrder(Integer orderId, Integer userId);
+    List<OrderResponse> getUserOrders(Integer userRefId);
 }

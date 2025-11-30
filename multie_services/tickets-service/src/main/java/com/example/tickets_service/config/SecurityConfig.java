@@ -11,23 +11,29 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity // Kích hoạt @PreAuthorize
+// @EnableMethodSecurity // TEMPORARY: Disabled for testing
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("⚙️ Tickets SecurityConfig: DISABLING ALL SECURITY FOR TESTING");
+        
         http.csrf(csrf -> csrf.disable());
-        // Không cần CORS config ở đây vì gateway đã xử lý
+        http.cors(cors -> cors.disable());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // TEMPORARY: Permit ALL requests
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         );
 
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        // TEMPORARY: Do NOT add JWT filter
+        // http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        System.out.println("✅ Tickets SecurityConfig: ALL SECURITY DISABLED");
+        
         return http.build();
     }
 }

@@ -1,6 +1,9 @@
+// Component Hero - Banner chính với form tìm kiếm chuyến tàu
+// Lấy danh sách stations (ga tàu) từ API thay vì dữ liệu cố định
 import { Search, Calendar, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { stationAPI } from '../services/stationService';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -10,6 +13,31 @@ const Hero = () => {
     date: '',
     hour: ''
   });
+  
+  // State để lưu danh sách stations từ API
+  const [stations, setStations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Lấy danh sách stations khi component mount
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        setLoading(true);
+        // Lấy chỉ stations đang active
+        const data = await stationAPI.getActiveStations();
+        setStations(data);
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách ga:', error);
+        // Không dùng fallback data - chỉ lấy từ API
+        setStations([]);
+        alert('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend và thử lại.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,10 +54,6 @@ const Hero = () => {
       [e.target.name]: e.target.value
     });
   };
-
-  const popularStations = [
-    'Nhổn', 'Minh Khai', 'Phú Diễn','Cầu Diễn', 'Lê Đức Thọ', 'Đại học Quốc gia', 'Chùa Hà','Cầu Giấy'
-  ];
 
   return (
     <section id="home" className="hero-section relative bg-gradient-to-r from-primary-700 to-primary-900 text-white py-20 md:py-32">
@@ -55,7 +79,7 @@ const Hero = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-              {/* GA ĐI */}
+              {/* GA ĐI - Lấy từ API */}
               <div className="form-group">
                 <label className="form-label block text-gray-700 font-semibold mb-2 flex items-center">
                   <MapPin className="w-5 h-5 mr-2 text-primary-600" />
@@ -69,17 +93,20 @@ const Hero = () => {
                              text-gray-900 font-semibold focus:border-primary-500
                              focus:ring-2 focus:ring-primary-300 outline-none"
                   required
+                  disabled={loading}
                 >
-                  <option value="" disabled>Chọn ga đi</option>
-                  {popularStations.map(station => (
-                    <option key={station} value={station} className="text-black">
-                      {station}
+                  <option value="" disabled>
+                    {loading ? 'Đang tải...' : 'Chọn ga đi'}
+                  </option>
+                  {stations.map(station => (
+                    <option key={station.id} value={station.name} className="text-black">
+                      {station.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* GA ĐẾN */}
+              {/* GA ĐẾN - Lấy t�� API */}
               <div className="form-group">
                 <label className="form-label block text-gray-700 font-semibold mb-2 flex items-center">
                   <MapPin className="w-5 h-5 mr-2 text-primary-600" />
@@ -93,11 +120,14 @@ const Hero = () => {
                              text-gray-900 font-semibold focus:border-primary-500
                              focus:ring-2 focus:ring-primary-300 outline-none"
                   required
+                  disabled={loading}
                 >
-                  <option value="" disabled>Chọn ga đến</option>
-                  {popularStations.map(station => (
-                    <option key={station} value={station} className="text-black">
-                      {station}
+                  <option value="" disabled>
+                    {loading ? 'Đang tải...' : 'Chọn ga đến'}
+                  </option>
+                  {stations.map(station => (
+                    <option key={station.id} value={station.name} className="text-black">
+                      {station.name}
                     </option>
                   ))}
                 </select>
@@ -145,9 +175,13 @@ const Hero = () => {
             </div>
 
             <div className="search-button-wrapper text-center">
-              <button type="submit" className="btn-primary flex items-center justify-center mx-auto gap-2 px-12 py-4 text-lg">
+              <button 
+                type="submit" 
+                className="btn-primary flex items-center justify-center mx-auto gap-2 px-12 py-4 text-lg"
+                disabled={loading}
+              >
                 <Search className="w-5 h-5" />
-                Tìm tàu
+                {loading ? 'Đang tải...' : 'Tìm tàu'}
               </button>
             </div>
           </form>

@@ -16,27 +16,52 @@ Hệ thống quản lý đặt vé tàu với kiến trúc microservices, bao g�
 - **Payment Service** (Port 5007): Xử lý thanh toán
 
 ### Frontend
-- **Admin Dashboard** (Port 5173): Giao diện quản trị
-- **Client Portal**: Giao diện người dùng
+- **Admin Dashboard** (Port 5173): Giao diện quản trị - `frontend/`
+- **Client Portal** (Port 5174): Giao diện người dùng - `frontend-client/`
 
 ---
 
 ## Hướng Dẫn Cài Đặt
 
-### Frontend
+### Backend Services
+```bash
+# Chạy từng service trong thư mục multie_services/
+# Mỗi service cần chạy trên port riêng:
+# - Gateway: 8888
+# - Auth Service: 5001
+# - Trains Service: 5002
+# - Stations Service: 5003
+# - Tickets Service: 5004
+# - Schedules Service: 5005
+# - Orders Service: 5006
+# - Payment Service: 5007
+```
+
+### Frontend Admin Dashboard
 ```bash
 # Cài đặt dependencies
+cd frontend
 npm install
 
-# Di chuyển vào thư mục frontend
-cd frontend
-
-# Chạy development server
+# Chạy development server (Port 5173)
 npm run dev
-
-# Đăng xuất Builder.io (nếu cần)
-npx "@builder.io/cli" logout
 ```
+
+### Frontend Client Portal
+```bash
+# Cài đặt dependencies
+cd frontend-client
+npm install
+
+# Chạy development server (Port 5174)
+npm run dev
+```
+
+### Lưu Ý
+- Đảm bảo Gateway Service đang chạy trước khi start frontend
+- Cả 2 frontend đều kết nối đến Gateway tại `http://localhost:8888`
+- Access token được lưu trong localStorage
+- Refresh token được lưu trong HTTP-only cookie
 
 ---
 
@@ -317,6 +342,23 @@ Tất cả API được truy cập qua Gateway: `http://localhost:8888`
 - **USER**: Người dùng thông thường - có thể xem thông tin, mua vé, quản lý đơn hàng
 - **ADMIN**: Quản trị viên - có toàn quyền CRUD trên tất cả resources
 
+### Public Endpoints (Không cần authentication)
+Các endpoint sau có thể truy cập mà không cần đăng nhập:
+- `GET /api/stations` - Xem danh sách ga
+- `GET /api/stations/{id}` - Xem thông tin ga
+- `GET /api/trains` - Xem danh sách tàu
+- `GET /api/trains/{id}` - Xem thông tin tàu
+- `GET /api/schedules` - Xem danh sách lịch trình
+- `GET /api/schedules/{id}` - Xem thông tin lịch trình
+- `POST /api/auth/signup` - Đăng ký
+- `POST /api/auth/signin` - Đăng nhập
+
+### Protected Endpoints (Cần authentication)
+Các endpoint còn lại yêu cầu JWT token:
+- Tạo, cập nhật, xóa resources (POST, PUT, PATCH, DELETE)
+- Đặt vé, quản lý đơn hàng, thanh toán
+- Xem thông tin cá nhân
+
 ### Authentication
 - Sử dụng JWT (JSON Web Token)
 - Access Token: Gửi trong header `Authorization: Bearer {token}`
@@ -326,7 +368,9 @@ Tất cả API được truy cập qua Gateway: `http://localhost:8888`
 ---
 
 ## CORS Configuration
-- Allowed Origin: `http://localhost:5173`
+- Allowed Origins: 
+  - `http://localhost:5173` (Admin Dashboard)
+  - `http://localhost:5174` (Client Portal)
 - Allowed Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
 - Credentials: Enabled
 

@@ -27,6 +27,8 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Public endpoints - cho phép xem danh sách tàu để tìm kiếm
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/trains", "/api/trains/*").permitAll()
                         // Các request khác sẽ được check quyền bởi @PreAuthorize ở Controller
                         .anyRequest().authenticated()
                 )

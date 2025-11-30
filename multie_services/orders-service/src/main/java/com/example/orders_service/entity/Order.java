@@ -58,6 +58,16 @@ public class Order {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // New fields for booking management
+    @Column(name = "passenger_details", columnDefinition = "TEXT")
+    private String passengerDetails;
+
+    @Column(name = "confirmation_code", length = 50, unique = true)
+    private String confirmationCode;
+
+    @Column(name = "confirmed_at")
+    private LocalDateTime confirmedAt;
+
     // Enum definitions
     public enum PaymentMethod {
         cash, credit_card, ewallet

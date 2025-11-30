@@ -209,6 +209,69 @@ public class TicketServiceImpl implements TicketService {
         ticket.setToStation(schedule.getArrivalStationNameSnapshot());
     }
 
+    @Override
+    public void decreaseQuantity(Long ticketId, Integer quantity) {
+        // Validate quantity > 0
+        if (quantity == null || quantity <= 0) {
+            throw new BadRequestException("Quantity must be greater than 0");
+        }
+
+        // Find ticket
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException("Ticket not found with id: " + ticketId));
+
+        // Validate available quantity >= requested quantity
+        Integer availableQuantity = ticket.getAvailableQuantity();
+        if (availableQuantity < quantity) {
+            throw new BadRequestException(
+                String.format("Insufficient tickets available. Requested: %d, Available: %d", 
+                    quantity, availableQuantity)
+            );
+        }
+
+        // Update soldQuantity atomically
+        ticket.setSoldQuantity(ticket.getSoldQuantity() + quantity);
+
+        // Auto update status to sold_out if no tickets left
+        if (ticket.getAvailableQuantity() == 0) {
+            ticket.setStatus(Ticket.Status.sold_out);
+        }
+
+        ticketRepository.save(ticket);
+    }
+
+    @Override
+    public void increaseQuantity(Long ticketId, Integer quantity) {
+        // Validate quantity > 0
+        if (quantity == null || quantity <= 0) {
+            throw new BadRequestException("Quantity must be greater than 0");
+        }
+
+        // Find ticket
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new NotFoundException("Ticket not found with id: " + ticketId));
+
+        // Decrease soldQuantity atomically
+        Integer newSoldQuantity = ticket.getSoldQuantity() - quantity;
+
+        // Ensure soldQuantity doesn't go negative
+        if (newSoldQuantity < 0) {
+            throw new BadRequestException(
+                String.format("Cannot increase quantity by %d. Current sold quantity: %d", 
+                    quantity, ticket.getSoldQuantity())
+            );
+        }
+
+        ticket.setSoldQuantity(newSoldQuantity);
+
+        // Update status back to active if tickets become available
+        if (ticket.getStatus() == Ticket.Status.sold_out && ticket.getAvailableQuantity() > 0) {
+            ticket.setStatus(Ticket.Status.active);
+        }
+
+        ticketRepository.save(ticket);
+    }
+
     // Mapper Helper Methods
     private TicketResponse mapEntityToResponse(Ticket entity) {
         TicketResponse res = new TicketResponse();
