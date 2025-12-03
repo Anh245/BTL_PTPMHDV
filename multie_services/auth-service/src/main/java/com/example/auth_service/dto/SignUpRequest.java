@@ -9,17 +9,12 @@ public class SignUpRequest {
     @Email
     @NotBlank
     private String email;
-
     @NotBlank
-    // note: spec calls the input "hashedPassword". We'll accept that param name but treat as raw password and hash it.
     private String password;
-
     @NotBlank
     private String username;
-
     private String firstname;
     private String lastname;
-
-    // optional role selection; default USER
     private String role;
 }
+

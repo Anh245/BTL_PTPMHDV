@@ -11,18 +11,12 @@ public class BookingRequest {
     private Integer userRefId;
     private Long scheduleRefId;
     private Long ticketRefId;
-    
-    // Thông tin hành khách
     private String passengerName;
     private String passengerEmail;
     private String passengerPhone;
     private String passengerIdNumber;
-    
-    // Thông tin vé
     private String seatNumber;
     private BigDecimal price;
-    
-    // Snapshot data
     private String trainNumberSnapshot;
     private String departureStationSnapshot;
     private String arrivalStationSnapshot;
