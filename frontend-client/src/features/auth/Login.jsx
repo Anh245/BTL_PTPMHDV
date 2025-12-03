@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Train, User } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Login = () => {
     const user = users.find(u => u.username === formData.username);
 
     if (!user) {
-      alert('Tên đăng nhập không tồn tại!');
+      toast.error('Tên đăng nhập không tồn tại!');
       return;
     }
 
@@ -37,7 +38,7 @@ const Login = () => {
 
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-    alert(`Xin chào ${user.fullName}! Đăng nhập thành công.`);
+    toast.success(`Xin chào ${user.fullName}! Đăng nhập thành công.`);
     navigate('/');
   };
 

@@ -7,6 +7,7 @@ import { scheduleAPI } from '../services/scheduleService';
 import { ticketAPI } from '../services/ticketService';
 import { orderAPI } from '../services/orderService';
 import useAuthStore from '../stores/useAuthStore';
+import { toast } from 'sonner';
 
 const Booking = () => {
   const location = useLocation();
@@ -129,13 +130,13 @@ const Booking = () => {
     e.preventDefault();
 
     if (!selectedSchedule) {
-      alert('Vui lòng chọn chuyến tàu');
+      toast.error('Vui lòng chọn chuyến tàu');
       return;
     }
 
     // Validate số vé với số vé còn lại (nếu có thông tin)
     if (selectedSchedule.availableSeats && numberOfTickets > selectedSchedule.availableSeats) {
-      alert(`Chỉ còn ${selectedSchedule.availableSeats} vé`);
+      toast.error(`Chỉ còn ${selectedSchedule.availableSeats} vé`);
       return;
     }
 
@@ -143,7 +144,7 @@ const Booking = () => {
     const currentUser = user || JSON.parse(localStorage.getItem('currentUser') || 'null');
     
     if (!currentUser) {
-      alert('Vui lòng đăng nhập để đặt vé');
+      toast.error('Vui lòng đăng nhập để đặt vé');
       navigate('/login');
       return;
     }
@@ -235,14 +236,11 @@ const Booking = () => {
         // Continue anyway - order is created, user can still see it
       }
 
-      alert(
-        `✅ Đặt vé thành công!\n\n` +
-        `Chuyến tàu: ${selectedSchedule.trainNumber}\n` +
-        `Từ: ${selectedSchedule.departureStation}\n` +
-        `Đến: ${selectedSchedule.arrivalStation}\n` +
-        `Số vé: ${numberOfTickets}\n` +
-        `Tổng tiền: ${totalPrice.toLocaleString('vi-VN')} VNĐ\n\n` +
-        `Mã đơn hàng: ${createdOrder.id}`
+      toast.success(
+        `Đặt vé thành công! Mã đơn hàng: ${createdOrder.id}`,
+        {
+          description: `${selectedSchedule.trainNumber} | ${selectedSchedule.departureStation} → ${selectedSchedule.arrivalStation} | ${numberOfTickets} vé | ${totalPrice.toLocaleString('vi-VN')} VNĐ`
+        }
       );
 
       // Navigate with timestamp to force reload
@@ -271,7 +269,7 @@ const Booking = () => {
       }
       
       setError(errorMessage);
-      alert(`❌ Lỗi đặt vé:\n\n${errorMessage}`);
+      toast.error('Lỗi đặt vé', { description: errorMessage });
     } finally {
       setBookingInProgress(false);
     }

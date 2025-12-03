@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authAPI } from '../services/authService';
+import { toast } from 'sonner';
 
 const useAuthStore = create((set, get) => ({
   // State
@@ -103,7 +104,7 @@ const useAuthStore = create((set, get) => ({
       
       localStorage.setItem('currentUser', JSON.stringify(userData));
       
-      alert('Đăng nhập thành công!');
+      toast.success('Đăng nhập thành công!');
       return res;
     } catch (err) {
       const errorMsg = typeof err.response?.data === 'string'
@@ -115,7 +116,7 @@ const useAuthStore = create((set, get) => ({
         error: errorMsg
       });
       
-      alert(errorMsg);
+      toast.error(errorMsg);
       throw err;
     }
   },
@@ -147,7 +148,7 @@ const useAuthStore = create((set, get) => ({
       localStorage.setItem('token', res.accessToken);
       localStorage.setItem('currentUser', JSON.stringify(userData));
       
-      alert('Đăng ký thành công!');
+      toast.success('Đăng ký thành công!');
       return res;
     } catch (err) {
       const errorMsg = typeof err.response?.data === 'string'
@@ -159,7 +160,7 @@ const useAuthStore = create((set, get) => ({
         error: errorMsg
       });
       
-      alert(errorMsg);
+      toast.error(errorMsg);
       throw err;
     }
   },

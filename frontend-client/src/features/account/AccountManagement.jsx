@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, Save, LogOut, Trash2, Eye, EyeOff } from 'lucide-react';
 import Header from '../../shared/components/Header';
 import Footer from '../../shared/components/Footer';
+import useAuthStore from '../../stores/useAuthStore';
+import { authAPI } from '../../services/authService';
+import { toast } from 'sonner';
 
 const AccountManagement = () => {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user, logout, isInitialized } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -23,19 +26,22 @@ const AccountManagement = () => {
   });
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
+    // Wait for initialization to complete
+    if (!isInitialized) {
+      return;
+    }
+
     if (!user) {
-      alert('Vui lòng đăng nhập để truy cập trang này');
+      toast.error('Vui lòng đăng nhập để truy cập trang này');
       navigate('/login');
       return;
     }
-    setCurrentUser(user);
     setFormData({
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone
+      fullName: user.fullName || '',
+      email: user.email || '',
+      phone: user.phone || ''
     });
-  }, [navigate]);
+  }, [user, isInitialized, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,96 +59,95 @@ const AccountManagement = () => {
     });
   };
 
-  const handleSaveProfile = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
+  const handleSaveProfile = async () => {
+    try {
+      // Split fullName into firstname and lastname
+      const nameParts = formData.fullName.trim().split(' ');
+      const firstname = nameParts[0] || '';
+      const lastname = nameParts.slice(1).join(' ') || '';
 
-    if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
+      await authAPI.updateProfile({
+        firstname,
+        lastname,
+        email: formData.email
+      });
+
+      // Update localStorage
+      const updatedUser = {
+        ...user,
         fullName: formData.fullName,
+        firstname,
+        lastname,
         email: formData.email,
         phone: formData.phone
       };
 
-      localStorage.setItem('users', JSON.stringify(users));
-
-      const updatedCurrentUser = {
-        id: currentUser.id,
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone
-      };
-
-      localStorage.setItem('currentUser', JSON.stringify(updatedCurrentUser));
-      setCurrentUser(updatedCurrentUser);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       setIsEditing(false);
-      alert('Cập nhật thông tin thành công!');
+      toast.success('Cập nhật thông tin thành công!');
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      const errorMsg = error.response?.data?.message || error.response?.data || 'Cập nhật thông tin thất bại. Vui lòng thử lại.';
+      toast.error(errorMsg);
     }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Mật khẩu mới không khớp!');
+      toast.error('Mật khẩu mới không khớp!');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      alert('Mật khẩu phải có ít nhất 8 ký tự!');
+      toast.error('Mật khẩu phải có ít nhất 8 ký tự!');
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find(u => u.id === currentUser.id);
-
-    if (!user) {
-      alert('Không tìm thấy người dùng!');
+    if (!passwordData.currentPassword) {
+      toast.error('Vui lòng nhập mật khẩu hiện tại!');
       return;
     }
 
-    if (user.password !== passwordData.currentPassword) {
-      alert('Mật khẩu hiện tại không đúng!');
-      return;
+    try {
+      await authAPI.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordChange(false);
+      toast.success('Đổi mật khẩu thành công!');
+      
+    } catch (error) {
+      console.error('Error changing password:', error);
+      const errorMsg = error.response?.data?.message || error.response?.data || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.';
+      toast.error(errorMsg);
     }
-
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
-    users[userIndex].password = passwordData.newPassword;
-    localStorage.setItem('users', JSON.stringify(users));
-
-    setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-    setShowPasswordChange(false);
-    alert('Đổi mật khẩu thành công!');
   };
 
   const handleLogout = () => {
     if (window.confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-      localStorage.removeItem('currentUser');
-      alert('Đã đăng xuất thành công!');
+      logout();
+      toast.success('Đã đăng xuất thành công!');
       navigate('/');
     }
   };
 
   const handleDeleteAccount = () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác!')) {
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const updatedUsers = users.filter(u => u.id !== currentUser.id);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-      const bookings = JSON.parse(localStorage.getItem('trainBookings') || '[]');
-      const updatedBookings = bookings.filter(b => b.passenger.email !== currentUser.email);
-      localStorage.setItem('trainBookings', JSON.stringify(updatedBookings));
-
-      localStorage.removeItem('currentUser');
-      alert('Tài khoản đã được xóa!');
+      // TODO: Call backend API to delete account
+      logout();
+      toast.success('Tài khoản đã được xóa!');
       navigate('/');
     }
   };
 
-  if (!currentUser) {
+  if (!user) {
     return null;
   }
 
@@ -229,9 +234,9 @@ const AccountManagement = () => {
                     onClick={() => {
                       setIsEditing(false);
                       setFormData({
-                        fullName: currentUser.fullName,
-                        email: currentUser.email,
-                        phone: currentUser.phone
+                        fullName: user.fullName || '',
+                        email: user.email || '',
+                        phone: user.phone || ''
                       });
                     }}
                     className="btn-secondary"

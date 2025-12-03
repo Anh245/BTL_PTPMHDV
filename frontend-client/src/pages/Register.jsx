@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, UserPlus } from 'lucide-react';
 import useAuthStore from '../stores/useAuthStore';
+import { toast } from 'sonner';
 
 const getPasswordStrength = (password) => {
   if (!password) return { strength: 0, label: '', color: '' };
@@ -51,17 +52,17 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert('Mật khẩu không khớp!');
+      toast.error('Mật khẩu không khớp!');
       return;
     }
 
     if (!formData.agreeToTerms) {
-      alert('Vui lòng đồng ý với Điều khoản và Điều kiện');
+      toast.error('Vui lòng đồng ý với Điều khoản và Điều kiện');
       return;
     }
 
     if (formData.username.length < 3) {
-      alert('Tên người dùng phải có ít nhất 3 ký tự');
+      toast.error('Tên người dùng phải có ít nhất 3 ký tự');
       return;
     }
 

@@ -4,6 +4,7 @@ import { ArrowLeft, Train, Clock, Calendar, MapPin, CreditCard, Ticket } from 'l
 import Header from '../../shared/components/Header';
 import Footer from '../../shared/components/Footer';
 import { stationAPI } from '../../services/stationService';
+import { toast } from 'sonner';
 
 const Booking = () => {
   const location = useLocation();
@@ -36,7 +37,7 @@ const Booking = () => {
       } catch (error) {
         console.error('Lỗi khi tải danh sách ga:', error);
         setStations([]);
-        alert('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend.');
+        toast.error('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend.');
       }
     };
 
@@ -51,7 +52,7 @@ const Booking = () => {
 
     const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
     if (!user) {
-      alert('Vui lòng đăng nhập để đặt vé');
+      toast.error('Vui lòng đăng nhập để đặt vé');
       navigate('/login');
       return;
     }
@@ -114,12 +115,12 @@ const Booking = () => {
   const handleBooking = (e) => {
     e.preventDefault();
     if (!selectedTrain) {
-      alert('Vui lòng chọn chuyến tàu');
+      toast.error('Vui lòng chọn chuyến tàu');
       return;
     }
 
     if (numberOfTickets > selectedTrain.availableSeats) {
-      alert(`Chỉ còn ${selectedTrain.availableSeats} chỗ trống`);
+      toast.error(`Chỉ còn ${selectedTrain.availableSeats} chỗ trống`);
       return;
     }
 
@@ -142,7 +143,12 @@ const Booking = () => {
     existingBookings.push(bookingDetails);
     localStorage.setItem('trainBookings', JSON.stringify(existingBookings));
 
-    alert(`Đặt vé thành công!\nHành khách: ${currentUser.fullName}\nChuyến tàu: ${selectedTrain.name}\nSố vé: ${numberOfTickets}\nTổng tiền: ${bookingDetails.totalPrice.toLocaleString('vi-VN')} VNĐ\n\nMã đặt vé: ${bookingDetails.id}`);
+    toast.success(
+      `Đặt vé thành công! Mã đặt vé: ${bookingDetails.id}`,
+      {
+        description: `${selectedTrain.name} | ${numberOfTickets} vé | ${bookingDetails.totalPrice.toLocaleString('vi-VN')} VNĐ`
+      }
+    );
 
     navigate('/my-tickets');
   };

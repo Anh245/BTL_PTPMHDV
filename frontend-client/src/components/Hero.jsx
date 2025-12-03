@@ -4,6 +4,7 @@ import { Search, Calendar, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { stationAPI } from '../services/stationService';
+import { toast } from 'sonner';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const Hero = () => {
         console.error('Lỗi khi tải danh sách ga:', error);
         // Không dùng fallback data - chỉ lấy từ API
         setStations([]);
-        alert('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend và thử lại.');
+        toast.error('Không thể tải danh sách ga. Vui lòng kiểm tra kết nối backend và thử lại.');
       } finally {
         setLoading(false);
       }
@@ -42,7 +43,7 @@ const Hero = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (searchData.departure === searchData.destination) {
-      alert('Ga đi và ga đến không thể giống nhau');
+      toast.error('Ga đi và ga đến không thể giống nhau');
       return;
     }
     navigate('/booking', { state: searchData });

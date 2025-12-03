@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Train, Calendar, MapPin, User, Mail, Phone, CreditCard, Ticket, X, AlertCircle } from 'lucide-react';
 import Header from '../../shared/components/Header';
 import Footer from '../../shared/components/Footer';
+import { toast } from 'sonner';
 
 const MyTickets = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const MyTickets = () => {
       setBookings(updatedBookings);
       setShowDetails(false);
       setSelectedBooking(null);
-      alert('Đã hủy vé thành công!');
+      toast.success('Đã hủy vé thành công!');
     }
   };
 

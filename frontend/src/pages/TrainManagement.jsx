@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { useTrainStore } from '@/stores/useTrainStore';
 import TrainList from '../components/TrainList';
 import TrainForm from '../components/TrainForm';
+import { toast } from 'sonner';
 
 export default function TrainManagement() {
   const { trains, loading, fetchTrains, createTrain, updateTrain, deleteTrain, updateTrainStatus } = useTrainStore();
@@ -19,13 +20,15 @@ export default function TrainManagement() {
     try {
       if (editingTrain) {
         await updateTrain(editingTrain.id, data);
+        toast.success('Cập nhật tàu thành công!');
       } else {
         await createTrain(data);
+        toast.success('Tạo tàu thành công!');
       }
       setEditingTrain(null);
       setShowForm(false);
     } catch (err) {
-      alert('Lỗi lưu tàu: ' + err.message);
+      toast.error('Lỗi lưu tàu: ' + err.message);
     }
   };
 
@@ -34,16 +37,18 @@ export default function TrainManagement() {
     
     try {
       await deleteTrain(id);
+      toast.success('Xóa tàu thành công!');
     } catch (err) {
-      alert('Lỗi xóa tàu: ' + err.message);
+      toast.error('Lỗi xóa tàu: ' + err.message);
     }
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       await updateTrainStatus(id, newStatus);
+      toast.success('Cập nhật trạng thái thành công!');
     } catch (err) {
-      alert('Lỗi cập nhật trạng thái: ' + err.message);
+      toast.error('Lỗi cập nhật trạng thái: ' + err.message);
     }
   };
 

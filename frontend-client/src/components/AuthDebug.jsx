@@ -1,10 +1,13 @@
 import useAuthStore from '../stores/useAuthStore';
+import { toast } from 'sonner';
 
 const AuthDebug = () => {
   const { user, token, isAuthenticated } = useAuthStore();
 
   const checkAuth = () => {
-    alert(`Authentication Status:\n\nLogged in: ${isAuthenticated}\nUser: ${user?.username || 'None'}\nToken: ${token ? 'Present' : 'Missing'}`);
+    toast.info(`Authentication Status`, {
+      description: `Logged in: ${isAuthenticated} | User: ${user?.username || 'None'} | Token: ${token ? 'Present' : 'Missing'}`
+    });
   };
 
   if (!isAuthenticated) {

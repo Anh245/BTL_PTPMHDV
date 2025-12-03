@@ -9,6 +9,7 @@ import { ticketAPI } from '../services/ticketService';
 import { orderAPI } from '../services/orderService';
 import { scheduleAPI } from '../services/scheduleService';
 import useAuthStore from '../stores/useAuthStore';
+import { toast } from 'sonner';
 
 const MyTickets = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const MyTickets = () => {
     }
 
     if (!isAuthenticated || !user) {
-      alert('Vui lòng đ��ng nhập để xem vé của bạn');
+      toast.error('Vui lòng đ��ng nhập để xem vé của bạn');
       navigate('/login');
       return;
     }
@@ -59,7 +60,7 @@ const MyTickets = () => {
           currentUser,
           localStorage: localStorage.getItem('currentUser')
         });
-        alert('Không tìm thấy thông tin user. Vui lòng đăng nhập lại.');
+        toast.error('Không tìm thấy thông tin user. Vui lòng đăng nhập lại.');
         navigate('/login');
         return;
       }
@@ -129,7 +130,7 @@ const MyTickets = () => {
       setSchedulesMap(schedulesData);
     } catch (error) {
       console.error('Lỗi khi tải vé:', error);
-      alert('Không thể tải danh sách vé. Vui lòng thử lại.');
+      toast.error('Không thể tải danh sách vé. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -151,10 +152,10 @@ const MyTickets = () => {
       
       setShowDetails(false);
       setSelectedTicket(null);
-      alert('Đã hủy đơn hàng thành công!');
+      toast.success('Đã hủy đơn hàng thành công!');
     } catch (error) {
       console.error('Lỗi khi hủy đơn hàng:', error);
-      alert(error.response?.data?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
+      toast.error(error.response?.data?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
     } finally {
       setCancelling(false);
     }

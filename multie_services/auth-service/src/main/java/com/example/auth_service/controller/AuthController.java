@@ -123,6 +123,76 @@ public class AuthController {
         }
     }
 
+    @PatchMapping("/me")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody com.example.auth_service.dto.UpdateProfileRequest req) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập");
+            }
+
+            Object principal = authentication.getPrincipal();
+            if (!(principal instanceof JwtUserPrincipal)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication");
+            }
+
+            JwtUserPrincipal userPrincipal = (JwtUserPrincipal) principal;
+            Long userId = userPrincipal.getUserId();
+
+            User updatedUser = authService.updateProfile(
+                userId,
+                req.getFirstname(),
+                req.getLastname(),
+                req.getEmail()
+            );
+
+            UserResponse userResponse = UserResponse.builder()
+                    .id(updatedUser.getId())
+                    .email(updatedUser.getEmail())
+                    .username(updatedUser.getUsername())
+                    .firstname(updatedUser.getFirstname())
+                    .lastname(updatedUser.getLastname())
+                    .role(updatedUser.getRole())
+                    .build();
+
+            return ResponseEntity.ok(userResponse);
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server");
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody com.example.auth_service.dto.ChangePasswordRequest req) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập");
+            }
+
+            Object principal = authentication.getPrincipal();
+            if (!(principal instanceof JwtUserPrincipal)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication");
+            }
+
+            JwtUserPrincipal userPrincipal = (JwtUserPrincipal) principal;
+            Long userId = userPrincipal.getUserId();
+
+            authService.changePassword(userId, req.getCurrentPassword(), req.getNewPassword());
+
+            return ResponseEntity.ok("Đổi mật khẩu thành công");
+        } catch (SecurityException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server");
+        }
+    }
+
     private String getRefreshTokenFromCookies(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())

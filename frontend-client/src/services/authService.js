@@ -16,7 +16,24 @@ export const authAPI = {
     }, { withCredentials: true });
     return res.data;
   },
-  
+  // Update user profile
+  updateProfile: async (userData) => {
+    const res = await api.patch("/auth/me", {
+      firstname: userData.firstname,
+      lastname: userData.lastname,
+      email: userData.email
+    }, { withCredentials: true });
+    return res.data;
+  },
+
+  // Change password
+  changePassword: async (passwordData) => {
+    const res = await api.post("/auth/change-password", {
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword
+    }, { withCredentials: true });
+    return res.data;
+  },
   // Đăng nhập user
   // Input: { username, password }
   // Output: { token, user }

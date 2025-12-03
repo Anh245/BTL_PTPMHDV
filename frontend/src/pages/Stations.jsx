@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useStationStore } from '@/stores/useStationStore';
 import StationList from '@/components/StationList';
 import StationForm from '@/components/StationForm';
+import { toast } from 'sonner';
 
 export default function Stations() {
   const { stations, loading, fetchStations, createStation, updateStation, deleteStation, toggleStation } = useStationStore();
@@ -19,13 +20,15 @@ export default function Stations() {
     try {
       if (editingStation) {
         await updateStation(editingStation.id, data);
+        toast.success('Cập nhật ga thành công!');
       } else {
         await createStation(data);
+        toast.success('Tạo ga thành công!');
       }
       setEditingStation(null);
       setShowForm(false);
     } catch (err) {
-      alert('Lỗi lưu ga: ' + err.message);
+      toast.error('Lỗi lưu ga: ' + err.message);
     }
   };
 
@@ -34,16 +37,18 @@ export default function Stations() {
     
     try {
       await deleteStation(id);
+      toast.success('Xóa ga thành công!');
     } catch (err) {
-      alert('Lỗi xóa ga: ' + err.message);
+      toast.error('Lỗi xóa ga: ' + err.message);
     }
   };
 
   const handleToggle = async (id) => {
     try {
       await toggleStation(id);
+      toast.success('Chuyển đổi trạng thái ga thành công!');
     } catch (err) {
-      alert('Lỗi chuyển đổi trạng thái ga: ' + err.message);
+      toast.error('Lỗi chuyển đổi trạng thái ga: ' + err.message);
     }
   };
 

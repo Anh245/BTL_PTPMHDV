@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useTicketStore } from '@/stores/useTicketStore';
 import TicketList from '@/components/TicketList';
 import TicketForm from '@/components/TicketForm';
+import { toast } from 'sonner';
 
 export default function TicketManagement() {
   const { tickets, loading, fetchTickets, createTicket, updateTicket, deleteTicket, purchaseTickets } = useTicketStore();
@@ -19,10 +20,10 @@ export default function TicketManagement() {
     console.log('Submitting ticket data:', data); // Debug log
     if (editingTicket) {
       await updateTicket(editingTicket.id, data);
-      alert('Cập nhật vé thành công!');
+      toast.success('Cập nhật vé thành công!');
     } else {
       await createTicket(data);
-      alert('Tạo vé thành công!');
+      toast.success('Tạo vé thành công!');
     }
     setEditingTicket(null);
     setShowForm(false);
@@ -61,10 +62,10 @@ export default function TicketManagement() {
 
     try {
       await purchaseTickets(ticketId, parseInt(quantity));
-      alert(`Mua ${quantity} vé thành công!`);
+      toast.success(`Mua ${quantity} vé thành công!`);
     } catch (err) {
       console.error('Lỗi mua vé:', err);
-      alert(`Lỗi: ${err.response?.data?.message || err.message || 'Không thể mua vé'}`);
+      toast.error(`Lỗi: ${err.response?.data?.message || err.message || 'Không thể mua vé'}`);
     }
   };
 

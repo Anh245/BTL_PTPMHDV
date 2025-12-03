@@ -10,7 +10,7 @@ import Debug from './pages/Debug';
 import AuthTest from './pages/AuthTest';
 import AuthDebug from './components/AuthDebug';
 import useAuthStore from './stores/useAuthStore';
-
+import { Toaster } from 'sonner';
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
 
@@ -33,6 +33,7 @@ function App() {
       </Routes>
       {/* Debug component to check authentication status */}
       {/* <AuthDebug /> */}
+      <Toaster position="top-right" richColors />
     </>
   );
 }

@@ -145,4 +145,41 @@ public class AuthService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user với id: " + userId));
     }
+
+    @Transactional
+    public User updateProfile(Long userId, String firstname, String lastname, String email) {
+        User user = getUserById(userId);
+        
+        // Check if email is being changed and if it's already taken by another user
+        if (email != null && !email.equals(user.getEmail())) {
+            if (userRepository.existsByEmail(email)) {
+                throw new IllegalStateException("Email đã được sử dụng bởi tài khoản khác");
+            }
+            user.setEmail(email);
+        }
+        
+        if (firstname != null) {
+            user.setFirstname(firstname);
+        }
+        if (lastname != null) {
+            user.setLastname(lastname);
+        }
+        
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = getUserById(userId);
+        
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new SecurityException("Mật khẩu hiện tại không đúng");
+        }
+        
+        // Encode and set new password
+        String hashedNewPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedNewPassword);
+        userRepository.save(user);
+    }
 }

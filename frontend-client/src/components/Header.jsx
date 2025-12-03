@@ -2,6 +2,7 @@ import { Train, Menu, X, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/useAuthStore';
+import { toast } from 'sonner';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,7 +14,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    alert('Đã đăng xuất thành công!');
+    toast.success('Đã đăng xuất thành công!');
     navigate('/');
   };
 

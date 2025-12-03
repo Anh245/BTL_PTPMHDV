@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Train, User } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Register = () => {
     e.preventDefault();
 
     if (!formData.agreeToTerms) {
-      alert('Vui lòng đồng ý với Điều khoản và Điều kiện');
+      toast.error('Vui lòng đồng ý với Điều khoản và Điều kiện');
       return;
     }
 
@@ -30,7 +31,7 @@ const Register = () => {
 
     const existingUser = users.find(user => user.username === formData.username);
     if (existingUser) {
-      alert('Tên đăng nhập này đã được sử dụng!');
+      toast.error('Tên đăng nhập này đã được sử dụng!');
       return;
     }
 
@@ -44,7 +45,7 @@ const Register = () => {
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
 
-    alert('Đăng ký thành công! Vui lòng đăng nhập.');
+    toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
     navigate('/login');
   };
 

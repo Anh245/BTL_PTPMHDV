@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useScheduleStore } from '@/stores/useScheduleStore';
 import ScheduleList from '@/components/ScheduleList';
 import ScheduleForm from '@/components/ScheduleForm';
+import { toast } from 'sonner';
 
 export default function Schedules() {
   const { schedules, loading, fetchSchedules, createSchedule, updateSchedule, deleteSchedule } = useScheduleStore();
@@ -19,13 +20,15 @@ export default function Schedules() {
     try {
       if (editingSchedule) {
         await updateSchedule(editingSchedule.id, data);
+        toast.success('Cập nhật lịch trình thành công!');
       } else {
         await createSchedule(data);
+        toast.success('Tạo lịch trình thành công!');
       }
       setEditingSchedule(null);
       setShowForm(false);
     } catch (err) {
-      alert('Lỗi lưu lịch trình: ' + err.message);
+      toast.error('Lỗi lưu lịch trình: ' + err.message);
     }
   };
 
@@ -34,8 +37,9 @@ export default function Schedules() {
     
     try {
       await deleteSchedule(id);
+      toast.success('Xóa lịch trình thành công!');
     } catch (err) {
-      alert('Lỗi xóa lịch trình: ' + err.message);
+      toast.error('Lỗi xóa lịch trình: ' + err.message);
     }
   };
 
