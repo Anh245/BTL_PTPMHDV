@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections; // Import thêm để dùng Collections.singletonList hoặc List.of
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -24,12 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtils = jwtUtils;
     }
 
-    // [OPTIONAL] Giống stations-service: Bỏ qua filter cho các endpoint public
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/actuator") || path.startsWith("/swagger") || path.startsWith("/v3/api-docs");
-    }
+    // ĐÃ XÓA: method shouldNotFilter -> Để đảm bảo mọi request đều được check token nếu có
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -46,28 +41,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Jws<Claims> claims = jwtUtils.validateAndParse(token);
                 String username = claims.getBody().getSubject();
 
-                // 2. [QUAN TRỌNG] Lấy role theo đúng logic của stations-service
+                // 2. Lấy Role
                 String role = claims.getBody().get("role", String.class);
 
                 if (role != null) {
-                    // Chuẩn hóa role: Chuyển thành chữ hoa (ví dụ: "admin" -> "ADMIN")
                     role = role.toUpperCase();
-
-                    // Xử lý tiền tố ROLE_ để đảm bảo chuẩn Spring Security
-                    // Nếu token là "ROLE_ADMIN" -> cắt thành "ADMIN" rồi cộng lại "ROLE_" -> "ROLE_ADMIN"
-                    // Logic này hơi thừa nhưng an toàn để đồng bộ với code mẫu
                     if (role.startsWith("ROLE_")) {
                         role = role.substring(5);
                     }
 
-                    // Tạo Authority: Luôn phải có prefix ROLE_
+                    // Gán quyền: ROLE_ADMIN hoặc ROLE_USER
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     username,
                                     null,
-                                    Collections.singletonList(authority) // Tạo list chứa 1 quyền
+                                    Collections.singletonList(authority)
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
@@ -76,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
             } catch (Exception e) {
-                // Log lỗi để debug
+                // Token lỗi -> SecurityContext rỗng -> SecurityConfig sẽ chặn (401)
                 System.err.println("Lỗi xác thực JWT: " + e.getMessage());
             }
         }
