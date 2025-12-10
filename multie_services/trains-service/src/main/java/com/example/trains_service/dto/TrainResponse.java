@@ -10,7 +10,6 @@ public class TrainResponse {
     private Long id;
     private String name;
     private String trainNumber;
-    private Integer totalSeats;
     private Train.Status status;
     private LocalDateTime createdAt;
 }

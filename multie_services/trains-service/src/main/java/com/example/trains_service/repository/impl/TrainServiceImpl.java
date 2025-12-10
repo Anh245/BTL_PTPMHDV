@@ -86,7 +86,6 @@ public class TrainServiceImpl implements TrainService {
         res.setId(train.getId());
         res.setName(train.getName());
         res.setTrainNumber(train.getTrainNumber());
-        res.setTotalSeats(train.getTotalSeats());
         res.setStatus(train.getStatus());
         res.setCreatedAt(train.getCreatedAt());
         return res;

@@ -33,8 +33,6 @@ public class Schedule {
     private LocalDateTime departureTime;
     @Column(name = "arrival_time", nullable = false)
     private LocalDateTime arrivalTime;
-    @Column(name = "base_price", precision = 12, scale = 2)
-    private BigDecimal basePrice;
     @Enumerated(EnumType.STRING)
     private Status status;
     @Column(name = "created_at", updatable = false)

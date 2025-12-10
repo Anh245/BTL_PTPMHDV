@@ -16,8 +16,6 @@ public class Train {
     private String name; // Unity Expres
     @Column(unique = true, nullable = false)
     private String trainNumber; // SE1
-    @Column(name = "total_seats", nullable = false)
-    private Integer totalSeats; // Tổng số ghế
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;

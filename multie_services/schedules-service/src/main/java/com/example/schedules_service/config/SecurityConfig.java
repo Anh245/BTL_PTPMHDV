@@ -3,7 +3,6 @@ package com.example.schedules_service.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Để hỗ trợ @PreAuthorize nếu cần dùng thêm trong Controller
+@EnableMethodSecurity // Hỗ trợ @PreAuthorize trong Controller
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -39,8 +38,11 @@ public class SecurityConfig {
                         // Các endpoint public (Swagger, Actuator)
                         .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // TEMPORARY: Open all schedules endpoints for testing
-                        .requestMatchers("/api/schedules/**").permitAll()
+                        // --- [SỬA ĐỔI QUAN TRỌNG] ---
+                        // Đã xóa dòng permitAll cho /api/schedules/** để đảm bảo bảo mật.
+                        // Các request vào đây bắt buộc phải có Token hợp lệ (Authenticated).
+                        // Việc phân quyền cụ thể (ADMIN/USER) sẽ do @PreAuthorize ở Controller xử lý.
+                        .requestMatchers("/api/schedules/**").authenticated()
 
                         // Các request còn lại bắt buộc phải đăng nhập
                         .anyRequest().authenticated()

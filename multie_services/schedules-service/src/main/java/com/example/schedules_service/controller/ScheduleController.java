@@ -3,6 +3,7 @@ package com.example.schedules_service.controller;
 import com.example.schedules_service.dto.ScheduleRequest;
 import com.example.schedules_service.dto.ScheduleResponse;
 import com.example.schedules_service.service.ScheduleService;
+import jakarta.validation.Valid; // Bổ sung import này
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,8 @@ public class ScheduleController {
     // 1. CREATE - ADMIN ONLY
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ScheduleResponse> create(@RequestBody ScheduleRequest request) {
+    // Thêm @Valid để kích hoạt kiểm tra lỗi trong ScheduleRequest
+    public ResponseEntity<ScheduleResponse> create(@Valid @RequestBody ScheduleRequest request) {
         return ResponseEntity.ok(scheduleService.create(request));
     }
 
@@ -31,18 +33,19 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.getAll());
     }
 
-    // 2.1. GET BY ID - Allow for inter-service communication
+    // 2.1. GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(scheduleService.getById(id));
     }
 
-    // 3. UPDATE - ADMIN ONLY (Dùng PUT cho update)
+    // 3. UPDATE - ADMIN ONLY
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    // Thêm @Valid ở đây nữa
     public ResponseEntity<ScheduleResponse> update(
             @PathVariable Long id,
-            @RequestBody ScheduleRequest request) {
+            @Valid @RequestBody ScheduleRequest request) {
         return ResponseEntity.ok(scheduleService.update(id, request));
     }
 

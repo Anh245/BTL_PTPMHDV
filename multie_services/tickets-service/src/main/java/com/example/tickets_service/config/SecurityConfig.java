@@ -11,29 +11,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @RequiredArgsConstructor
-// @EnableMethodSecurity // TEMPORARY: Disabled for testing
+@EnableMethodSecurity // <--- 1. QUAN TRỌNG: Dòng này kích hoạt @PreAuthorize bên Controller
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("⚙️ Tickets SecurityConfig: DISABLING ALL SECURITY FOR TESTING");
-        
+        System.out.println("🔒 Tickets SecurityConfig: SECURITY ENABLED (JWT + RBAC)"); // Update log để dễ debug
+
         http.csrf(csrf -> csrf.disable());
-        http.cors(cors -> cors.disable());
+        http.cors(cors -> cors.disable()); // Hoặc config CORS nếu FE gọi trực tiếp
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // TEMPORARY: Permit ALL requests
         http.authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                // Nếu có các endpoint public (ví dụ swagger), khai báo ở đây:
+                // .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                // Tất cả các request khác bắt buộc phải có Token (Authenticated)
+                // Việc user có quyền ADMIN hay USER sẽ do Controller quyết định
+                .anyRequest().authenticated()
         );
 
-        // TEMPORARY: Do NOT add JWT filter
-        // http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        
-        System.out.println("✅ Tickets SecurityConfig: ALL SECURITY DISABLED");
-        
+        // <--- 2. QUAN TRỌNG: Thêm filter để giải mã JWT Token
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
