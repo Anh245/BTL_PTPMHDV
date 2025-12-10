@@ -24,7 +24,6 @@ public class TrainServiceImpl implements TrainService {
         Train train = new Train();
         train.setName(request.getName());
         train.setTrainNumber(request.getTrainNumber());
-        train.setTotalSeats(request.getTotalSeats());
         train.setStatus(request.getStatus());
 
         Train savedTrain = trainRepository.save(train);
@@ -57,7 +56,6 @@ public class TrainServiceImpl implements TrainService {
         // Update fields
         if (request.getName() != null) train.setName(request.getName());
         if (request.getTrainNumber() != null) train.setTrainNumber(request.getTrainNumber());
-        if (request.getTotalSeats() != null) train.setTotalSeats(request.getTotalSeats());
         if (request.getStatus() != null) train.setStatus(request.getStatus());
 
         Train updatedTrain = trainRepository.save(train);

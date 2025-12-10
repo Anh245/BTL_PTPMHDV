@@ -4,6 +4,7 @@ import com.example.trains_service.dto.TrainRequest;
 import com.example.trains_service.dto.TrainResponse;
 import com.example.trains_service.entity.Train;
 import com.example.trains_service.service.TrainService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +22,7 @@ public class TrainController {
     // 1. Create - ADMIN ONLY
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TrainResponse> create(@RequestBody TrainRequest request) {
+    public ResponseEntity<TrainResponse> create(@Valid @RequestBody TrainRequest request) {
         return ResponseEntity.ok(trainService.create(request));
     }
 
