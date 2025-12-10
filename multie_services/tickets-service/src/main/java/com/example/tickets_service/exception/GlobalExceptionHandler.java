@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
@@ -26,7 +27,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Access Denied"));
+        // Sửa message "Access Denied" -> "Truy cập bị từ chối" để khớp TC_6
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Truy cập bị từ chối"));
     }
 
     @ExceptionHandler(ServiceUnavailableException.class)
@@ -42,6 +44,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        // TC_2, TC_3, TC_4 sẽ trả về lỗi 400 kèm message tiếng Việt ở đây
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("errors", errors));
     }
 

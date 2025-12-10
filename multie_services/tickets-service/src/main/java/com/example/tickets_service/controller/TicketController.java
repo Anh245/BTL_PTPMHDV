@@ -20,7 +20,7 @@ public class TicketController {
 
     // 1. Create - Chỉ ADMIN
     @PostMapping("/create")
-    // @PreAuthorize("hasRole('ADMIN')") // TEMPORARY: Disabled for testing
+    @PreAuthorize("hasRole('ADMIN')") // Đã bỏ comment để khớp với TC_6
     public ResponseEntity<TicketResponse> create(@Valid @RequestBody TicketRequest request) {
         return ResponseEntity.ok(ticketService.create(request));
     }

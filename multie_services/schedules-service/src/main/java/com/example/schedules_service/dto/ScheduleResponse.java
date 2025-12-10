@@ -17,7 +17,6 @@ public class ScheduleResponse {
     private String arrivalStationNameSnapshot;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
-    private BigDecimal basePrice;
     private Long durationMinutes;
     private Schedule.Status status;
 }

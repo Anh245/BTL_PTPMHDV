@@ -79,10 +79,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw new BadRequestException("Thời gian đến không được bỏ trống");
         }
 
-        // TC_5: Kiểm tra giá vé
-        if (req.getBasePrice() == null) {
-            throw new BadRequestException("Giá vé không được bỏ trống");
-        }
 
         // TC_6: Logic thời gian (Đến phải sau Đi)
         if (!req.getArrivalTime().isAfter(req.getDepartureTime())) {
@@ -100,7 +96,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         entity.setArrivalStationNameSnapshot(req.getArrivalStationNameSnapshot());
         entity.setDepartureTime(req.getDepartureTime());
         entity.setArrivalTime(req.getArrivalTime());
-        entity.setBasePrice(req.getBasePrice());
 
         entity.setStatus(req.getStatus() != null ? req.getStatus() : Schedule.Status.scheduled);
     }
@@ -121,7 +116,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         res.setDepartureTime(entity.getDepartureTime());
         res.setArrivalTime(entity.getArrivalTime());
-        res.setBasePrice(entity.getBasePrice());
         res.setStatus(entity.getStatus());
 
         if (entity.getDepartureTime() != null && entity.getArrivalTime() != null) {

@@ -11,18 +11,26 @@ import java.math.BigDecimal;
 
 @Data
 public class TicketRequest {
-    @NotNull(message = "Schedule reference is required")
+    // Sửa message khớp với TC_2
+    @NotNull(message = "Mã lịch trình không được bỏ trống")
     private Long scheduleRefId;
-    @NotBlank(message = "Ticket name is required")
-    @Size(max = 100, message = "Ticket name must not exceed 100 characters")
+
+    // Sửa message khớp với TC_3
+    @NotBlank(message = "Tên vé không được bỏ trống")
+    @Size(max = 100, message = "Tên vé không được vượt quá 100 ký tự")
     private String name;
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+
+    // Sửa message khớp với TC_4
+    @NotNull(message = "Giá vé không được bỏ trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá vé phải lớn hơn 0")
     private BigDecimal price;
-    @Size(max = 500, message = "Description must not exceed 500 characters")
+
+    @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự")
     private String description;
-    @NotNull(message = "Total quantity is required")
-    @Min(value = 1, message = "Total quantity must be at least 1")
+
+    @NotNull(message = "Tổng số lượng là bắt buộc")
+    @Min(value = 1, message = "Tổng số lượng phải ít nhất là 1")
     private Integer totalQuantity;
+
     private String status; // "active", "inactive", "sold_out"
 }
