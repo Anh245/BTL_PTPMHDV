@@ -78,11 +78,22 @@ export const useAuthStore = create(
             set({ loading: true });
 
             const user = await authService.fetchMe();
+            if (!user) {
+                throw new Error('No user data received');
+            }
             set({ user });
         } catch (error) {
             console.error("Fetch me failed:", error);
-            set({ user: null,accessToken:null });
-            toast.error("Loi khi lay du lieu nguoi dung.");
+            
+            // Nếu lỗi 401/403, có thể token không hợp lệ
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                get().clearState();
+                throw error; // Throw để ProtectRoute xử lý
+            } else {
+                // Lỗi khác, chỉ clear user
+                set({ user: null });
+                toast.error("Lỗi khi lấy dữ liệu người dùng.");
+            }
         }
         finally {
             set({ loading: false });
@@ -92,20 +103,22 @@ export const useAuthStore = create(
         try {
             set({ loading: true });
 
-            const {setAccessToken} = get();
             const accessToken = await authService.refresh();
-            setAccessToken(accessToken);
+            
+            if (!accessToken) {
+                throw new Error('No access token received from refresh');
+            }
+            
+            get().setAccessToken(accessToken);
             // Không gọi fetchMe ở đây, để ProtectRoute xử lý
         } catch (error) {
-            console.error("refesh that bai:", error);
-            // Không hiển thị toast ở đây vì có thể chưa có refresh token (lần đầu vào)
+            console.error("Refresh thất bại:", error);
+            // Clear state khi refresh thất bại
             get().clearState();
             throw error; // Throw để ProtectRoute biết refresh thất bại
         } finally {
             set({ loading: false });
         }
-    
-
     }
 }),
     {

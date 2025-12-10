@@ -7,7 +7,8 @@ import {
   User,
   Menu,
   X,
-  Ticket
+  Ticket,
+  ChartArea
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Tàu', href: '/trains', icon: Train },
   { name: 'Lịch trình', href: '/schedules', icon: Calendar },
   { name: 'Vé tàu', href: '/tickets', icon: Ticket },
+  {name: 'Thống kê', href: '/analys' , icon:ChartArea }
   
 ]
 

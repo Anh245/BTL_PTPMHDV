@@ -27,7 +27,7 @@ const useAuthStore = create((set, get) => ({
           isInitialized: true
         });
         
-        // Verify token in background
+        // Verify token in background - không block UI
         authAPI.verifyToken(storedToken)
           .then((res) => {
             const verifiedUser = res.user || res;
@@ -43,7 +43,8 @@ const useAuthStore = create((set, get) => ({
             set({ user: userData });
             localStorage.setItem('currentUser', JSON.stringify(userData));
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error("Token verification failed:", error);
             // Token invalid, clear everything
             get().logout();
           });
@@ -57,6 +58,7 @@ const useAuthStore = create((set, get) => ({
         });
       }
     } catch (err) {
+      console.error("Initialize failed:", err);
       // Invalid data in localStorage, clear it
       localStorage.removeItem('token');
       localStorage.removeItem('currentUser');

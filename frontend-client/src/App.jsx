@@ -9,6 +9,7 @@ import Account from './pages/Account';
 import Debug from './pages/Debug';
 import AuthTest from './pages/AuthTest';
 import AuthDebug from './components/AuthDebug';
+import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './stores/useAuthStore';
 import { Toaster } from 'sonner';
 function App() {
@@ -25,9 +26,21 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/my-tickets" element={<MyTickets />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/booking" element={
+          <ProtectedRoute>
+            <Booking />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-tickets" element={
+          <ProtectedRoute>
+            <MyTickets />
+          </ProtectedRoute>
+        } />
+        <Route path="/account" element={
+          <ProtectedRoute>
+            <Account />
+          </ProtectedRoute>
+        } />
         {/* <Route path="/debug" element={<Debug />} /> */}
         {/* <Route path="/auth-test" element={<AuthTest />} /> */}
       </Routes>

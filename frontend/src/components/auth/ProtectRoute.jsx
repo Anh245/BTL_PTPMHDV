@@ -13,8 +13,9 @@ const ProtectRoute = () => {
           try {
             await refresh();
           } catch (refreshError) {
-            // Nếu refresh fail, không làm gì - để ProtectRoute redirect về signin
+            // Nếu refresh fail, clear state và để redirect về signin
             console.error("Refresh failed:", refreshError);
+            useAuthStore.getState().clearState();
             setStarting(false);
             return;
           }
@@ -23,10 +24,17 @@ const ProtectRoute = () => {
         // Sau khi refresh (hoặc đã có token), lấy lại accessToken mới từ store
         const currentToken = useAuthStore.getState().accessToken;
         if(currentToken && !user){
-          await fetchMe();
+          try {
+            await fetchMe();
+          } catch (fetchError) {
+            console.error("Fetch user failed:", fetchError);
+            // Nếu fetch user fail, có thể token không hợp lệ
+            useAuthStore.getState().clearState();
+          }
         }
       } catch (error) {
         console.error("Init failed:", error);
+        useAuthStore.getState().clearState();
       } finally {
         setStarting(false);
       }
