@@ -6,18 +6,33 @@ spring:
     web-application-type: reactive
   application:
     name: gateway-service
+
+  # --- SỬA: data phải nằm thụt vào trong spring ---
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # --- SỬA: cloud phải nằm thụt vào trong spring ---
   cloud:
     gateway:
+      # --- CẤU HÌNH RATE LIMITER (Nằm ngang hàng với routes và globalcors) ---
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            key-resolver: "#{@userKeyResolver}"
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
 
-      # --- BẮT ĐẦU CẤU HÌNH CORS GLOBAL ---
-      # Đoạn này sẽ tự động xử lý CORS cho tất cả các route bên dưới
+      # --- CẤU HÌNH CORS ---
       globalcors:
         add-to-simple-url-handler-mapping: true
         cors-configurations:
-          '[/**]': # Áp dụng cho mọi đường dẫn
+          '[/**]':
             allowedOriginPatterns:
-              - "http://localhost:5173"  # Frontend Admin Dashboard
-              - "http://localhost:5174"  # Frontend Client Portal
+              - "http://localhost:5173"
+              - "http://localhost:5174"
             allowedMethods:
               - GET
               - POST
@@ -25,14 +40,12 @@ spring:
               - PATCH
               - DELETE
               - OPTIONS
-            allowedHeaders:
-              - "*"
-            exposedHeaders:
-              - "*"
+            allowedHeaders: "*"
+            exposedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
-      # --- KẾT THÚC CẤU HÌNH CORS ---
 
+      # --- CÁC ROUTE ---
       routes:
         - id: auth_route
           uri: http://localhost:5001
