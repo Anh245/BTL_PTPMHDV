@@ -129,14 +129,19 @@ public class OrderServiceImpl implements OrderService {
             order.setPaymentMethod(Order.PaymentMethod.cash);
         }
 
-        // Set initial status to 'created' and payment status to 'pending'
-        order.setPaymentStatus(Order.PaymentStatus.pending);
-        order.setOrderStatus(Order.OrderStatus.created);
+        // Set initial status to 'confirmed' and payment status to 'paid' (thanh toán trực tiếp)
+        order.setPaymentStatus(Order.PaymentStatus.paid);
+        order.setOrderStatus(Order.OrderStatus.confirmed);
+        
+        // Generate confirmation code for immediate confirmation
+        order.setConfirmationCode(generateConfirmationCode());
+        order.setConfirmedAt(LocalDateTime.now());
         order.setCreatedAt(LocalDateTime.now());
 
         // Step 7: Save order to database
         Order savedOrder = orderRepository.save(order);
-        log.info("Order created with ID: {}", savedOrder.getId());
+        log.info("Order created and confirmed with ID: {}, Confirmation code: {}", 
+                savedOrder.getId(), savedOrder.getConfirmationCode());
 
         // Step 8: Decrease ticket quantity (Property 4)
         // Implement compensation logic - if this fails, the transaction will rollback
@@ -183,7 +188,14 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found: " + id));
 
-        // Step 2: Validate order status is 'created' (Property 19)
+        // Step 2: Check if order is already confirmed (thanh toán trực tiếp)
+        if (order.getOrderStatus() == Order.OrderStatus.confirmed && 
+            order.getPaymentStatus() == Order.PaymentStatus.paid) {
+            log.info("Order {} is already confirmed and paid", id);
+            return mapToResponse(order);
+        }
+        
+        // Validate order status is 'created' for manual payment confirmation
         if (order.getOrderStatus() != Order.OrderStatus.created) {
             throw new ValidationException(
                 String.format("Cannot confirm payment for order in %s status. Order must be in created status.", 

@@ -73,4 +73,23 @@ export const ticketAPI = {
   deleteTicket: (id) => api.delete(`/tickets/${id}`),
 };
 
+export const orderAPI = {
+  getOrders: (params) => api.get('/orders', { params }),
+  getOrder: (id) => api.get(`/orders/${id}`),
+  createOrder: (data) => api.post('/orders/create', data),
+  getUserOrders: (userId) => api.get(`/orders/user/${userId}`),
+  confirmPayment: (id) => api.put(`/orders/${id}/confirm`),
+  cancelOrder: (id) => api.put(`/orders/${id}/cancel`),
+};
+
+export const analyticsAPI = {
+  getOrdersSummary: () => api.get('/analytics/orders/summary'),
+  getOrdersByDate: (days = 7) => api.get(`/analytics/orders/by-date?days=${days}`),
+  getRevenueSummary: () => api.get('/analytics/revenue/summary'),
+  getOrdersByStatus: () => api.get('/analytics/orders/by-status'),
+  getOrdersByPaymentMethod: () => api.get('/analytics/orders/by-payment-method'),
+};
+
+
+
 export default api;

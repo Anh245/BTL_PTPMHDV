@@ -216,23 +216,15 @@ const Booking = () => {
       };
 
       const createdOrder = await orderAPI.createOrder(orderData);
-      console.log('Order created successfully:', createdOrder);
+      console.log('Order created and confirmed successfully:', createdOrder);
 
-      // Step 3: Confirm payment to change order status from 'created' to 'confirmed'
-      // Note: soldQuantity is automatically updated by backend when order is created
-      try {
-        await orderAPI.confirmPayment(createdOrder.id);
-      } catch (error) {
-        console.error('Error confirming payment:', error);
-        console.error('Error response:', error.response?.data);
-        console.error('Error status:', error.response?.status);
-        // Continue anyway - order is created, user can still see it
-      }
+      // Note: Với thanh toán trực tiếp, đơn hàng đã được tự động xác nhận và thanh toán
+      // Không cần gọi confirmPayment nữa
 
       toast.success(
-        `Đặt vé thành công! Mã đơn hàng: ${createdOrder.id}`,
+        `Đặt vé thành công! Mã xác nhận: ${createdOrder.confirmationCode || createdOrder.id}`,
         {
-          description: `${selectedSchedule.trainNumber} | ${selectedSchedule.departureStation} → ${selectedSchedule.arrivalStation} | ${numberOfTickets} vé | ${totalPrice.toLocaleString('vi-VN')} VNĐ`
+          description: `${selectedSchedule.trainNumber} | ${selectedSchedule.departureStation} → ${selectedSchedule.arrivalStation} | ${numberOfTickets} vé | ${totalPrice.toLocaleString('vi-VN')} VNĐ | Đã thanh toán`
         }
       );
 

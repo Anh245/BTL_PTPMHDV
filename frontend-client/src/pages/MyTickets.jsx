@@ -184,8 +184,8 @@ const MyTickets = () => {
     const statusMap = {
       'CONFIRMED': { text: 'Đã đặt vé', class: 'bg-green-100 text-green-700' },
       'confirmed': { text: 'Đã đặt vé', class: 'bg-green-100 text-green-700' },
-      'CREATED': { text: 'Chờ thanh toán', class: 'bg-yellow-100 text-yellow-700' },
-      'created': { text: 'Chờ thanh toán', class: 'bg-yellow-100 text-yellow-700' },
+      'CREATED': { text: 'Đã đặt vé', class: 'bg-green-100 text-green-700' }, // Cũ, hiếm khi xảy ra
+      'created': { text: 'Đã đặt vé', class: 'bg-green-100 text-green-700' }, // Cũ, hiếm khi xảy ra
       'PENDING': { text: 'Chờ xử lý', class: 'bg-yellow-100 text-yellow-700' },
       'CANCELLED': { text: 'Đã hủy', class: 'bg-red-100 text-red-700' },
       'cancelled': { text: 'Đã hủy', class: 'bg-red-100 text-red-700' },

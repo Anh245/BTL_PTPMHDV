@@ -50,15 +50,15 @@
 
 #### PaymentStatus (Auto-set by backend)
 
-- `pending` - Chờ thanh toán (default)
-- `paid` - Đã thanh toán
+- `paid` - Đã thanh toán (default - thanh toán trực tiếp)
+- `pending` - Chờ thanh toán (chỉ dùng cho trường hợp đặc biệt)
 - `failed` - Thanh toán thất bại
 - `refunded` - Đã hoàn tiền
 
 #### OrderStatus (Auto-set by backend)
 
-- `created` - Đơn hàng mới tạo (default)
-- `confirmed` - Đã xác nhận
+- `confirmed` - Đã xác nhận (default - xác nhận trực tiếp)
+- `created` - Đơn hàng mới tạo (chỉ dùng cho trường hợp đặc biệt)
 - `cancelled` - Đã hủy
 
 ### Response
@@ -75,8 +75,10 @@
   "quantity": 2,
   "totalAmount": 1000000,
   "paymentMethod": "cash",
-  "paymentStatus": "pending",
-  "orderStatus": "created",
+  "paymentStatus": "paid",
+  "orderStatus": "confirmed",
+  "confirmationCode": "BK-A1B2C3D4",
+  "confirmedAt": "2025-11-29T10:08:54",
   "createdAt": "2025-11-29T10:08:54"
 }
 ```
@@ -219,8 +221,9 @@ const orderData = {
 
 const order = await orderAPI.createOrder(orderData);
 expect(order.paymentMethod).toBe('cash');
-expect(order.paymentStatus).toBe('pending');
-expect(order.orderStatus).toBe('created');
+expect(order.paymentStatus).toBe('paid');
+expect(order.orderStatus).toBe('confirmed');
+expect(order.confirmationCode).toBeDefined();
 ```
 
 ### Test Case 2: Create Order with Credit Card
