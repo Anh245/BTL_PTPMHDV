@@ -3,6 +3,7 @@ package com.example.stations_service.controller;
 import com.example.stations_service.dto.StationRequest;
 import com.example.stations_service.dto.StationResponse;
 import com.example.stations_service.service.StationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize; // Đã thêm import
@@ -43,7 +44,7 @@ public class StationController {
     // 4. Create - ADMIN ONLY
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')") // Chỉ ADMIN được tạo
-    public ResponseEntity<StationResponse> create(@RequestBody StationRequest request) {
+    public ResponseEntity<StationResponse> create(@Valid @RequestBody StationRequest request) {
         return ResponseEntity.ok(stationService.createStation(request));
     }
 

@@ -39,7 +39,6 @@ public class StationServiceImpl implements StationService {
 
         if (request.getName() != null) station.setName(request.getName());
         if (request.getAddress() != null) station.setAddress(request.getAddress());
-        if (request.getIsActive() != null) station.setIsActive(request.getIsActive());
 
         return toResponse(stationRepository.save(station));
     }
@@ -49,7 +48,6 @@ public class StationServiceImpl implements StationService {
         Station station = new Station();
         station.setName(request.getName());
         station.setAddress(request.getAddress());
-        station.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
 
         return toResponse(stationRepository.save(station));
     }
