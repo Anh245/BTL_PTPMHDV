@@ -167,7 +167,30 @@ const Booking = () => {
         arrivalTimeOnly: selectedSchedule.arrivalTimeOnly
       });
 
-      // Step 1: Create order
+      // Step 1: Find the actual ticket ID for this schedule
+      const allTickets = await ticketAPI.getTickets();
+      const scheduleTickets = allTickets.filter(ticket => 
+        (ticket.scheduleId === selectedSchedule.id || ticket.scheduleRefId === selectedSchedule.id) &&
+        ticket.status && ticket.status.toUpperCase() === 'ACTIVE'
+      );
+
+      if (scheduleTickets.length === 0) {
+        toast.error('Không tìm thấy vé cho chuyến tàu này');
+        return;
+      }
+
+      // Find ticket with enough available seats
+      const availableTicket = scheduleTickets.find(ticket => {
+        const available = (ticket.totalQuantity || 0) - (ticket.soldQuantity || 0);
+        return available >= numberOfTickets;
+      });
+
+      if (!availableTicket) {
+        toast.error('Không đủ vé cho số lượng yêu cầu');
+        return;
+      }
+
+      // Step 2: Create order with actual ticket ID
       // Create passenger details (required field)
       const passengerDetails = [];
       for (let i = 0; i < numberOfTickets; i++) {
@@ -184,8 +207,8 @@ const Booking = () => {
         userEmailSnapshot: currentUser.email || '',
         scheduleRefId: parseInt(selectedSchedule.id),  // Ensure Integer
         scheduleInfoSnapshot: scheduleInfoSnapshot,
-        ticketTypeRefId: 1,
-        ticketTypeNameSnapshot: 'Standard',
+        ticketTypeRefId: parseInt(availableTicket.id),  // Use actual ticket ID
+        ticketTypeNameSnapshot: availableTicket.ticketType || 'Standard',
         quantity: parseInt(numberOfTickets),  // Ensure Integer
         totalAmount: totalPrice,  // Number for BigDecimal
         paymentMethod: 'cash', // Valid enum: cash, credit_card, ewallet
@@ -193,40 +216,10 @@ const Booking = () => {
       };
 
       const createdOrder = await orderAPI.createOrder(orderData);
-
-      // Step 2: Update ticket soldQuantity
-      // Find an active ticket for this schedule and update soldQuantity
-      try {
-        const allTickets = await ticketAPI.getTickets();
-        const scheduleTickets = allTickets.filter(ticket => 
-          (ticket.scheduleId === selectedSchedule.id || ticket.scheduleRefId === selectedSchedule.id) &&
-          ticket.status && ticket.status.toUpperCase() === 'ACTIVE'
-        );
-        
-        // TODO: soldQuantity should be updated by backend (tickets-service)
-        // when order is created, not by frontend
-        // Commenting out to avoid PUT /tickets error
-        
-        // if (scheduleTickets.length > 0) {
-        //   const availableTicket = scheduleTickets.find(ticket => {
-        //     const available = (ticket.totalQuantity || 0) - (ticket.soldQuantity || 0);
-        //     return available >= numberOfTickets;
-        //   });
-        //   
-        //   if (availableTicket) {
-        //     const updatedTicket = await ticketAPI.updateTicket(availableTicket.id, {
-        //       ...availableTicket,
-        //       soldQuantity: (availableTicket.soldQuantity || 0) + numberOfTickets
-        //     });
-        //     console.log('Ticket updated:', updatedTicket);
-        //   }
-        // }
-      } catch (error) {
-        console.error('Error in booking process:', error);
-        // Continue anyway - order is created
-      }
+      console.log('Order created successfully:', createdOrder);
 
       // Step 3: Confirm payment to change order status from 'created' to 'confirmed'
+      // Note: soldQuantity is automatically updated by backend when order is created
       try {
         await orderAPI.confirmPayment(createdOrder.id);
       } catch (error) {

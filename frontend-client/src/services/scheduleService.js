@@ -145,11 +145,11 @@ export const scheduleAPI = {
 
         return {
           ...schedule,
-          // Đảm bảo có trainNumber
-          trainNumber: schedule.trainNumberSnapshot || schedule.trainNumber || 'N/A',
-          // Đảm bảo có tên ga
-          departureStation: schedule.departureStationNameSnapshot || schedule.departureStation || 'N/A',
-          arrivalStation: schedule.arrivalStationNameSnapshot || schedule.arrivalStation || 'N/A',
+          // Ưu tiên dữ liệu mới nhất từ schedule, fallback về snapshot
+          trainNumber: schedule.trainNumber || schedule.trainNumberSnapshot || 'N/A',
+          // Ưu tiên tên ga mới nhất
+          departureStation: schedule.departureStation || schedule.departureStationNameSnapshot || 'N/A',
+          arrivalStation: schedule.arrivalStation || schedule.arrivalStationNameSnapshot || 'N/A',
           // Giá từ ticket (đã cập nhật)
           basePrice: ticketPrice,
           ticketPrice: ticketPrice,
